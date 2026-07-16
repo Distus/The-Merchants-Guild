@@ -1,4 +1,237 @@
 {
-  "_comment": "Base and rotating item pool definitions per store type. Phase 1: To be populated.",
-  "pools": {}
+  "_comment": "Base and rotating item pool definitions per store type. Items reference SRD compendium names. Prices in GP.",
+  "pools": {
+    "general-goods": {
+      "base": [
+        { "name": "Backpack", "price": { "gp": 2 }, "category": "adventuring-gear" },
+        { "name": "Bedroll", "price": { "gp": 1 }, "category": "adventuring-gear" },
+        { "name": "Rations (1 day)", "price": { "gp": 0, "sp": 5 }, "category": "adventuring-gear" },
+        { "name": "Rope, Hempen (50 feet)", "price": { "gp": 1 }, "category": "adventuring-gear" },
+        { "name": "Torch", "price": { "gp": 0, "sp": 0, "cp": 1 }, "category": "adventuring-gear" },
+        { "name": "Waterskin", "price": { "gp": 0, "sp": 2 }, "category": "adventuring-gear" },
+        { "name": "Tinderbox", "price": { "gp": 0, "sp": 5 }, "category": "adventuring-gear" },
+        { "name": "Candle", "price": { "gp": 0, "sp": 0, "cp": 1 }, "category": "adventuring-gear" },
+        { "name": "Oil (flask)", "price": { "gp": 0, "sp": 1 }, "category": "adventuring-gear" },
+        { "name": "Sack", "price": { "gp": 0, "sp": 0, "cp": 1 }, "category": "adventuring-gear" },
+        { "name": "Piton", "price": { "gp": 0, "sp": 0, "cp": 5 }, "category": "adventuring-gear" },
+        { "name": "Hammer", "price": { "gp": 1 }, "category": "adventuring-gear" },
+        { "name": "Lantern, Hooded", "price": { "gp": 5 }, "category": "adventuring-gear" },
+        { "name": "Mess Kit", "price": { "gp": 0, "sp": 2 }, "category": "adventuring-gear" }
+      ],
+      "rotating": [
+        { "name": "Grappling Hook", "price": { "gp": 2 }, "category": "adventuring-gear" },
+        { "name": "Climber's Kit", "price": { "gp": 25 }, "category": "kits" },
+        { "name": "Crowbar", "price": { "gp": 2 }, "category": "adventuring-gear" },
+        { "name": "Chain (10 feet)", "price": { "gp": 5 }, "category": "adventuring-gear" },
+        { "name": "Rope, Silk (50 feet)", "price": { "gp": 10 }, "category": "adventuring-gear" },
+        { "name": "Spyglass", "price": { "gp": 1000 }, "category": "adventuring-gear" },
+        { "name": "Tent, Two-Person", "price": { "gp": 2 }, "category": "adventuring-gear" },
+        { "name": "Blanket", "price": { "gp": 0, "sp": 5 }, "category": "adventuring-gear" },
+        { "name": "Fishing Tackle", "price": { "gp": 1 }, "category": "adventuring-gear" },
+        { "name": "Healer's Kit", "price": { "gp": 5 }, "category": "kits" },
+        { "name": "Caltrops (bag of 20)", "price": { "gp": 1 }, "category": "adventuring-gear" },
+        { "name": "Ball Bearings (bag of 1,000)", "price": { "gp": 1 }, "category": "adventuring-gear" },
+        { "name": "Mirror, Steel", "price": { "gp": 5 }, "category": "adventuring-gear" },
+        { "name": "Ink (1 ounce bottle)", "price": { "gp": 10 }, "category": "adventuring-gear" },
+        { "name": "Parchment (one sheet)", "price": { "gp": 0, "sp": 1 }, "category": "adventuring-gear" },
+        { "name": "Sealing Wax", "price": { "gp": 0, "sp": 5 }, "category": "adventuring-gear" }
+      ]
+    },
+    "blacksmith": {
+      "base": [
+        { "name": "Dagger", "price": { "gp": 2 }, "category": "weapons" },
+        { "name": "Handaxe", "price": { "gp": 5 }, "category": "weapons" },
+        { "name": "Mace", "price": { "gp": 5 }, "category": "weapons" },
+        { "name": "Quarterstaff", "price": { "gp": 0, "sp": 2 }, "category": "weapons" },
+        { "name": "Spear", "price": { "gp": 1 }, "category": "weapons" },
+        { "name": "Shortsword", "price": { "gp": 10 }, "category": "weapons" },
+        { "name": "Longsword", "price": { "gp": 15 }, "category": "weapons" },
+        { "name": "Battleaxe", "price": { "gp": 10 }, "category": "weapons" },
+        { "name": "Warhammer", "price": { "gp": 15 }, "category": "weapons" }
+      ],
+      "rotating": [
+        { "name": "Greatsword", "price": { "gp": 50 }, "category": "weapons" },
+        { "name": "Greataxe", "price": { "gp": 30 }, "category": "weapons" },
+        { "name": "Rapier", "price": { "gp": 25 }, "category": "weapons" },
+        { "name": "Scimitar", "price": { "gp": 25 }, "category": "weapons" },
+        { "name": "Morningstar", "price": { "gp": 15 }, "category": "weapons" },
+        { "name": "War Pick", "price": { "gp": 5 }, "category": "weapons" },
+        { "name": "Flail", "price": { "gp": 10 }, "category": "weapons" },
+        { "name": "Glaive", "price": { "gp": 20 }, "category": "weapons" },
+        { "name": "Halberd", "price": { "gp": 20 }, "category": "weapons" },
+        { "name": "Pike", "price": { "gp": 5 }, "category": "weapons" },
+        { "name": "Maul", "price": { "gp": 10 }, "category": "weapons" },
+        { "name": "Trident", "price": { "gp": 5 }, "category": "weapons" },
+        { "name": "Silvered Weapon (any)", "price": { "gp": 100 }, "category": "weapons" },
+        { "name": "Smith's Tools", "price": { "gp": 20 }, "category": "tools" }
+      ]
+    },
+    "armorer": {
+      "base": [
+        { "name": "Padded Armor", "price": { "gp": 5 }, "category": "armor" },
+        { "name": "Leather Armor", "price": { "gp": 10 }, "category": "armor" },
+        { "name": "Studded Leather Armor", "price": { "gp": 45 }, "category": "armor" },
+        { "name": "Hide Armor", "price": { "gp": 10 }, "category": "armor" },
+        { "name": "Shield", "price": { "gp": 10 }, "category": "armor" }
+      ],
+      "rotating": [
+        { "name": "Chain Shirt", "price": { "gp": 50 }, "category": "armor" },
+        { "name": "Scale Mail", "price": { "gp": 50 }, "category": "armor" },
+        { "name": "Breastplate", "price": { "gp": 400 }, "category": "armor" },
+        { "name": "Half Plate", "price": { "gp": 750 }, "category": "armor" },
+        { "name": "Ring Mail", "price": { "gp": 30 }, "category": "armor" },
+        { "name": "Chain Mail", "price": { "gp": 75 }, "category": "armor" },
+        { "name": "Splint Armor", "price": { "gp": 200 }, "category": "armor" },
+        { "name": "Plate Armor", "price": { "gp": 1500 }, "category": "armor" }
+      ]
+    },
+    "apothecary": {
+      "base": [
+        { "name": "Antitoxin (vial)", "price": { "gp": 50 }, "category": "adventuring-gear" },
+        { "name": "Healer's Kit", "price": { "gp": 5 }, "category": "kits" },
+        { "name": "Herbalism Kit", "price": { "gp": 5 }, "category": "kits" },
+        { "name": "Component Pouch", "price": { "gp": 25 }, "category": "adventuring-gear" },
+        { "name": "Vial", "price": { "gp": 1 }, "category": "adventuring-gear" },
+        { "name": "Perfume (vial)", "price": { "gp": 5 }, "category": "adventuring-gear" }
+      ],
+      "rotating": [
+        { "name": "Acid (vial)", "price": { "gp": 25 }, "category": "adventuring-gear" },
+        { "name": "Alchemist's Fire (flask)", "price": { "gp": 50 }, "category": "adventuring-gear" },
+        { "name": "Alchemist's Supplies", "price": { "gp": 50 }, "category": "tools" },
+        { "name": "Poisoner's Kit", "price": { "gp": 50 }, "category": "kits" },
+        { "name": "Holy Water (flask)", "price": { "gp": 25 }, "category": "adventuring-gear" },
+        { "name": "Potion of Healing", "price": { "gp": 50 }, "category": "potions" },
+        { "name": "Soap", "price": { "gp": 0, "sp": 0, "cp": 2 }, "category": "adventuring-gear" },
+        { "name": "Basic Poison (vial)", "price": { "gp": 100 }, "category": "adventuring-gear" }
+      ]
+    },
+    "fletcher": {
+      "base": [
+        { "name": "Arrows (20)", "price": { "gp": 1 }, "category": "ammunition" },
+        { "name": "Crossbow Bolts (20)", "price": { "gp": 1 }, "category": "ammunition" },
+        { "name": "Shortbow", "price": { "gp": 25 }, "category": "weapons" },
+        { "name": "Longbow", "price": { "gp": 50 }, "category": "weapons" },
+        { "name": "Light Crossbow", "price": { "gp": 25 }, "category": "weapons" },
+        { "name": "Quiver", "price": { "gp": 1 }, "category": "adventuring-gear" }
+      ],
+      "rotating": [
+        { "name": "Hand Crossbow", "price": { "gp": 75 }, "category": "weapons" },
+        { "name": "Heavy Crossbow", "price": { "gp": 50 }, "category": "weapons" },
+        { "name": "Blowgun", "price": { "gp": 10 }, "category": "weapons" },
+        { "name": "Blowgun Needles (50)", "price": { "gp": 1 }, "category": "ammunition" },
+        { "name": "Sling Bullets (20)", "price": { "gp": 0, "sp": 0, "cp": 4 }, "category": "ammunition" },
+        { "name": "Dart", "price": { "gp": 0, "sp": 0, "cp": 5 }, "category": "weapons" },
+        { "name": "Javelin", "price": { "gp": 0, "sp": 5 }, "category": "weapons" },
+        { "name": "Net", "price": { "gp": 1 }, "category": "weapons" },
+        { "name": "Woodcarver's Tools", "price": { "gp": 1 }, "category": "tools" }
+      ]
+    },
+    "magic-shop": {
+      "base": [
+        { "name": "Arcane Focus (Crystal)", "price": { "gp": 10 }, "category": "adventuring-gear" },
+        { "name": "Arcane Focus (Orb)", "price": { "gp": 20 }, "category": "adventuring-gear" },
+        { "name": "Arcane Focus (Rod)", "price": { "gp": 10 }, "category": "adventuring-gear" },
+        { "name": "Arcane Focus (Staff)", "price": { "gp": 5 }, "category": "adventuring-gear" },
+        { "name": "Arcane Focus (Wand)", "price": { "gp": 10 }, "category": "adventuring-gear" },
+        { "name": "Component Pouch", "price": { "gp": 25 }, "category": "adventuring-gear" },
+        { "name": "Spellbook (Blank)", "price": { "gp": 50 }, "category": "adventuring-gear" },
+        { "name": "Ink (1 ounce bottle)", "price": { "gp": 10 }, "category": "adventuring-gear" }
+      ],
+      "rotating": [
+        { "name": "Hourglass", "price": { "gp": 25 }, "category": "adventuring-gear" },
+        { "name": "Magnifying Glass", "price": { "gp": 100 }, "category": "adventuring-gear" },
+        { "name": "Holy Symbol (Amulet)", "price": { "gp": 5 }, "category": "adventuring-gear" },
+        { "name": "Druidic Focus (Totem)", "price": { "gp": 1 }, "category": "adventuring-gear" },
+        { "name": "Crystal Ball (Mundane)", "price": { "gp": 25 }, "category": "adventuring-gear" },
+        { "name": "Scale, Merchant's", "price": { "gp": 5 }, "category": "adventuring-gear" }
+      ]
+    },
+    "tavern": {
+      "base": [
+        { "name": "Ale (mug)", "price": { "gp": 0, "sp": 0, "cp": 4 }, "category": "food-drink" },
+        { "name": "Ale (gallon)", "price": { "gp": 0, "sp": 2 }, "category": "food-drink" },
+        { "name": "Wine, Common (pitcher)", "price": { "gp": 0, "sp": 2 }, "category": "food-drink" },
+        { "name": "Meal, Modest", "price": { "gp": 0, "sp": 3 }, "category": "food-drink" },
+        { "name": "Meal, Comfortable", "price": { "gp": 0, "sp": 5 }, "category": "food-drink" },
+        { "name": "Room, Modest (per night)", "price": { "gp": 0, "sp": 5 }, "category": "lodging" },
+        { "name": "Room, Comfortable (per night)", "price": { "gp": 0, "sp": 8 }, "category": "lodging" }
+      ],
+      "rotating": [
+        { "name": "Wine, Fine (bottle)", "price": { "gp": 10 }, "category": "food-drink" },
+        { "name": "Meal, Wealthy", "price": { "gp": 0, "sp": 8 }, "category": "food-drink" },
+        { "name": "Room, Wealthy (per night)", "price": { "gp": 2 }, "category": "lodging" },
+        { "name": "Meal, Aristocratic", "price": { "gp": 2 }, "category": "food-drink" },
+        { "name": "Mead (mug)", "price": { "gp": 0, "sp": 0, "cp": 5 }, "category": "food-drink" },
+        { "name": "Spirits, Fine (glass)", "price": { "gp": 0, "sp": 5 }, "category": "food-drink" }
+      ]
+    },
+    "stables": {
+      "base": [
+        { "name": "Riding Horse", "price": { "gp": 75 }, "category": "mounts" },
+        { "name": "Mule", "price": { "gp": 8 }, "category": "mounts" },
+        { "name": "Pony", "price": { "gp": 30 }, "category": "mounts" },
+        { "name": "Feed (per day)", "price": { "gp": 0, "sp": 0, "cp": 5 }, "category": "tack" },
+        { "name": "Saddle, Riding", "price": { "gp": 10 }, "category": "tack" },
+        { "name": "Saddlebags", "price": { "gp": 4 }, "category": "tack" },
+        { "name": "Bit and Bridle", "price": { "gp": 2 }, "category": "tack" },
+        { "name": "Stabling (per day)", "price": { "gp": 0, "sp": 5 }, "category": "services" }
+      ],
+      "rotating": [
+        { "name": "Warhorse", "price": { "gp": 400 }, "category": "mounts" },
+        { "name": "Draft Horse", "price": { "gp": 50 }, "category": "mounts" },
+        { "name": "Saddle, Military", "price": { "gp": 20 }, "category": "tack" },
+        { "name": "Saddle, Exotic", "price": { "gp": 60 }, "category": "tack" },
+        { "name": "Barding, Leather", "price": { "gp": 40 }, "category": "tack" },
+        { "name": "Barding, Chain", "price": { "gp": 300 }, "category": "tack" },
+        { "name": "Cart", "price": { "gp": 15 }, "category": "vehicles" },
+        { "name": "Wagon", "price": { "gp": 35 }, "category": "vehicles" },
+        { "name": "Carriage", "price": { "gp": 100 }, "category": "vehicles" }
+      ]
+    },
+    "jeweler": {
+      "base": [
+        { "name": "Ring, Plain Gold", "price": { "gp": 25 }, "category": "jewelry" },
+        { "name": "Ring, Plain Silver", "price": { "gp": 5 }, "category": "jewelry" },
+        { "name": "Necklace, Simple", "price": { "gp": 15 }, "category": "jewelry" },
+        { "name": "Earrings, Copper", "price": { "gp": 2 }, "category": "jewelry" },
+        { "name": "Gemstone, Semi-Precious (10 gp)", "price": { "gp": 10 }, "category": "gemstones" },
+        { "name": "Signet Ring", "price": { "gp": 5 }, "category": "jewelry" }
+      ],
+      "rotating": [
+        { "name": "Gemstone, Lapis Lazuli (10 gp)", "price": { "gp": 10 }, "category": "gemstones" },
+        { "name": "Gemstone, Onyx (50 gp)", "price": { "gp": 50 }, "category": "gemstones" },
+        { "name": "Gemstone, Moonstone (50 gp)", "price": { "gp": 50 }, "category": "gemstones" },
+        { "name": "Gemstone, Garnet (100 gp)", "price": { "gp": 100 }, "category": "gemstones" },
+        { "name": "Gemstone, Pearl (100 gp)", "price": { "gp": 100 }, "category": "gemstones" },
+        { "name": "Gemstone, Topaz (500 gp)", "price": { "gp": 500 }, "category": "gemstones" },
+        { "name": "Gemstone, Emerald (1,000 gp)", "price": { "gp": 1000 }, "category": "gemstones" },
+        { "name": "Gemstone, Diamond (5,000 gp)", "price": { "gp": 5000 }, "category": "gemstones" },
+        { "name": "Jeweler's Tools", "price": { "gp": 25 }, "category": "tools" },
+        { "name": "Gold Chain Necklace", "price": { "gp": 250 }, "category": "jewelry" },
+        { "name": "Crown, Simple Silver", "price": { "gp": 100 }, "category": "jewelry" },
+        { "name": "Brooch, Ornate", "price": { "gp": 75 }, "category": "jewelry" }
+      ]
+    },
+    "clothier": {
+      "base": [
+        { "name": "Common Clothes", "price": { "gp": 0, "sp": 5 }, "category": "clothing" },
+        { "name": "Traveler's Clothes", "price": { "gp": 2 }, "category": "clothing" },
+        { "name": "Robes", "price": { "gp": 1 }, "category": "clothing" },
+        { "name": "Cloak", "price": { "gp": 1 }, "category": "clothing" },
+        { "name": "Boots", "price": { "gp": 1 }, "category": "clothing" }
+      ],
+      "rotating": [
+        { "name": "Fine Clothes", "price": { "gp": 15 }, "category": "clothing" },
+        { "name": "Costume", "price": { "gp": 5 }, "category": "clothing" },
+        { "name": "Vestments", "price": { "gp": 2 }, "category": "clothing" },
+        { "name": "Disguise Kit", "price": { "gp": 25 }, "category": "kits" },
+        { "name": "Weaver's Tools", "price": { "gp": 1 }, "category": "tools" },
+        { "name": "Winter Cloak, Heavy", "price": { "gp": 5 }, "category": "clothing" },
+        { "name": "Hat, Feathered", "price": { "gp": 3 }, "category": "clothing" },
+        { "name": "Gloves, Fine Leather", "price": { "gp": 2 }, "category": "clothing" },
+        { "name": "Scarf, Silk", "price": { "gp": 5 }, "category": "clothing" },
+        { "name": "Noble's Outfit", "price": { "gp": 75 }, "category": "clothing" }
+      ]
+    }
+  }
 }
