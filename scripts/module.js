@@ -244,11 +244,34 @@ Hooks.once("ready", async () => {
 
 /**
  * Add a button to the scene controls for the GM
- * This appears in the left-side toolbar
+ * Compatible with Foundry v11-v14
+ *
+ * v14: controls is an object — add tool to existing group
+ * v11-v12: controls is an array — push a new group
  */
 Hooks.on("getSceneControlButtons", (controls) => {
   if (!game.user.isGM) return;
 
+  // v14+: controls is an object with named groups
+  if (!Array.isArray(controls)) {
+    const targetGroup = controls.tokens || controls.token;
+    if (targetGroup) {
+      targetGroup.tools.merchantsGuild = {
+        name: "merchants-guild",
+        title: "The Merchant's Guild",
+        icon: "fa-solid fa-store",
+        order: 100,
+        button: true,
+        visible: true,
+        onChange: () => {
+          ShopManager.open();
+        }
+      };
+    }
+    return;
+  }
+
+  // v11-v12: controls is an array
   controls.push({
     name: "merchants-guild",
     title: "The Merchant's Guild",
