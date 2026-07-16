@@ -1,6 +1,393 @@
 /**
  * The Merchant's Guild — Styles
- * Module styling for shop manager, shop views, and transaction panels
+ * Module styling for shop manager, config, and shop views
  */
 
-/* Phase 2+: To be implemented */
+/* ============================================================
+   Shared
+   ============================================================ */
+
+.merchants-guild {
+  font-family: "Signika", "Palatino Linotype", serif;
+}
+
+.merchants-guild h2,
+.merchants-guild h3,
+.merchants-guild h4 {
+  border-bottom: 1px solid #7a7971;
+  margin: 0 0 8px 0;
+  padding-bottom: 4px;
+}
+
+.merchants-guild hr {
+  border: none;
+  border-top: 1px solid #7a7971;
+  margin: 12px 0;
+}
+
+.merchants-guild button {
+  cursor: pointer;
+}
+
+/* ============================================================
+   Shop Manager
+   ============================================================ */
+
+.mg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.mg-header h2 {
+  border: none;
+  margin: 0;
+  padding: 0;
+  font-size: 1.2em;
+}
+
+.create-shop-btn {
+  background: #4b6584;
+  color: #fff;
+  border: 1px solid #3d566e;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 0.85em;
+}
+
+.create-shop-btn:hover {
+  background: #3d566e;
+}
+
+/* Shop List */
+
+.mg-shop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mg-shop-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  padding: 8px 10px;
+}
+
+.mg-shop-entry:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.mg-shop-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.mg-shop-name {
+  font-weight: bold;
+  font-size: 1em;
+  margin-bottom: 2px;
+}
+
+.mg-shop-meta {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.mg-type-badge,
+.mg-affluence-badge {
+  font-size: 0.75em;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: #555;
+  color: #fff;
+}
+
+.mg-affluence-1 { background: #8b7355; }
+.mg-affluence-2 { background: #6b8e5a; }
+.mg-affluence-3 { background: #4b7baa; }
+.mg-affluence-4 { background: #7b68ae; }
+.mg-affluence-5 { background: #c4a035; }
+
+.mg-shop-keeper {
+  font-size: 0.85em;
+  color: #555;
+}
+
+.mg-shop-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.mg-shop-actions button {
+  background: none;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+  padding: 4px 8px;
+  font-size: 0.85em;
+}
+
+.mg-shop-actions button:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.shop-delete-btn:hover {
+  color: #c0392b;
+  border-color: #c0392b;
+}
+
+/* Empty State */
+
+.mg-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+}
+
+.mg-empty-state i {
+  font-size: 2.5em;
+  margin-bottom: 12px;
+  display: block;
+}
+
+/* ============================================================
+   Shop Config
+   ============================================================ */
+
+.mg-config-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mg-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mg-form-group label {
+  font-weight: bold;
+  font-size: 0.85em;
+}
+
+.mg-form-group select,
+.mg-form-group input[type="text"],
+.mg-form-group textarea {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #7a7971;
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: 0.9em;
+}
+
+.mg-form-group textarea {
+  resize: vertical;
+}
+
+.mg-party-info {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 0.85em;
+}
+
+.generate-shop-btn,
+.save-shop-btn {
+  background: #4b6584;
+  color: #fff;
+  border: 1px solid #3d566e;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 0.9em;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.generate-shop-btn:hover,
+.save-shop-btn:hover {
+  background: #3d566e;
+}
+
+.save-shop-btn {
+  background: #27ae60;
+  border-color: #1e8449;
+}
+
+.save-shop-btn:hover {
+  background: #1e8449;
+}
+
+/* ============================================================
+   Preview Section
+   ============================================================ */
+
+.mg-preview h3 {
+  font-size: 1.1em;
+}
+
+.mg-preview-section {
+  margin-bottom: 12px;
+}
+
+.mg-preview-section h4 {
+  font-size: 0.95em;
+  margin-bottom: 6px;
+}
+
+/* Keeper Details */
+
+.mg-keeper-name {
+  font-weight: bold;
+  font-size: 1.05em;
+}
+
+.mg-keeper-meta {
+  font-size: 0.85em;
+  color: #666;
+  text-transform: capitalize;
+}
+
+.mg-keeper-personality {
+  margin: 4px 0;
+  font-size: 0.9em;
+}
+
+.mg-keeper-description {
+  font-size: 0.9em;
+  margin-bottom: 4px;
+}
+
+.mg-keeper-rp {
+  font-size: 0.85em;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 6px 8px;
+  border-radius: 3px;
+  margin-top: 4px;
+}
+
+/* Social DCs */
+
+.mg-dc-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
+.mg-dc-item {
+  text-align: center;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  padding: 6px 4px;
+}
+
+.mg-dc-label {
+  display: block;
+  font-size: 0.7em;
+  text-transform: uppercase;
+  color: #666;
+}
+
+.mg-dc-value {
+  display: block;
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+/* Stat Block */
+
+.mg-stat-block {
+  font-size: 0.9em;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 6px 8px;
+  border-radius: 3px;
+}
+
+/* Bias */
+
+.mg-bias-section {
+  border-left: 3px solid #e67e22;
+  padding-left: 8px;
+}
+
+.mg-bias-severity {
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.8em;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.mg-bias-unfavorable {
+  background: #f39c12;
+  color: #fff;
+}
+
+.mg-bias-hostile {
+  background: #c0392b;
+  color: #fff;
+}
+
+.mg-bias-rp {
+  font-style: italic;
+  font-size: 0.85em;
+  margin-top: 4px;
+}
+
+/* Inventory Summary */
+
+.mg-inventory-summary {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.mg-inv-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 8px;
+  font-size: 0.85em;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.mg-inv-item:last-child {
+  border-bottom: none;
+}
+
+.mg-inv-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mg-inv-price {
+  flex-shrink: 0;
+  color: #666;
+  margin-left: 8px;
+}
+
+.mg-attunement-flag {
+  flex-shrink: 0;
+  margin-left: 4px;
+  color: #8e44ad;
+  font-size: 0.9em;
+}
+
+/* Rarity coloring for magic items */
+
+.mg-rarity-uncommon .mg-inv-name { color: #27ae60; }
+.mg-rarity-rare .mg-inv-name { color: #2980b9; }
+.mg-rarity-very-rare .mg-inv-name { color: #8e44ad; }
+.mg-rarity-legendary .mg-inv-name { color: #c4a035; font-weight: bold; }

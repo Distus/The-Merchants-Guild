@@ -1,1 +1,145 @@
-{{!-- Shop Config — Create/edit shop dialog. Phase 2: To be implemented --}}
+<div class="merchants-guild-config">
+  <div class="mg-config-form">
+    <div class="mg-form-group">
+      <label for="storeType">Store Type</label>
+      <select name="storeType">
+        {{#each storeTypes}}
+          <option value="{{this.id}}">{{this.label}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="mg-form-group">
+      <label for="affluenceTier">Town Affluence</label>
+      <select name="affluenceTier">
+        {{#each affluenceTiers}}
+          <option value="{{this.tier}}">{{this.label}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="mg-party-info">
+      <i class="fas fa-users"></i>
+      Party Level: <strong>{{partyLevel}}</strong> (Tier {{partyTier}})
+      — Max Rarity: <strong>{{maxRarity}}</strong> | Consumables: <strong>{{consumableMax}}</strong>
+    </div>
+
+    <button class="generate-shop-btn" type="button">
+      <i class="fas fa-dice"></i> Generate Shop
+    </button>
+  </div>
+
+  {{#if hasPreview}}
+    <hr>
+    <div class="mg-preview">
+      <h3>Preview</h3>
+
+      <div class="mg-form-group">
+        <label>Shop Name</label>
+        <input type="text" class="edit-shop-name" value="{{generatedShop.name}}">
+      </div>
+
+      <div class="mg-form-group">
+        <label>Description</label>
+        <textarea class="edit-shop-description" rows="4">{{generatedShop.description}}</textarea>
+      </div>
+
+      <div class="mg-preview-section">
+        <h4><i class="fas fa-user"></i> Shopkeeper</h4>
+        <div class="mg-keeper-details">
+          <div class="mg-keeper-name">{{generatedShop.shopkeeper.name}}</div>
+          <div class="mg-keeper-meta">
+            {{generatedShop.shopkeeper.race}} · {{generatedShop.shopkeeper.gender}}
+          </div>
+          <div class="mg-keeper-personality">
+            <em>{{generatedShop.shopkeeper.personality}}</em>
+          </div>
+          <div class="mg-keeper-description">
+            {{generatedShop.shopkeeper.physicalDescription}}
+          </div>
+          {{#if generatedShop.shopkeeper.rpHints}}
+            <div class="mg-keeper-rp">
+              <strong>RP Hints:</strong> {{generatedShop.shopkeeper.rpHints}}
+            </div>
+          {{/if}}
+        </div>
+      </div>
+
+      <div class="mg-preview-section">
+        <h4><i class="fas fa-dice-d20"></i> Social DCs</h4>
+        <div class="mg-dc-grid">
+          <div class="mg-dc-item">
+            <span class="mg-dc-label">Haggle</span>
+            <span class="mg-dc-value">{{generatedShop.shopkeeper.socialDCs.haggleDC}}</span>
+          </div>
+          <div class="mg-dc-item">
+            <span class="mg-dc-label">Intimidate</span>
+            <span class="mg-dc-value">{{generatedShop.shopkeeper.socialDCs.intimidateDC}}</span>
+          </div>
+          <div class="mg-dc-item">
+            <span class="mg-dc-label">Theft</span>
+            <span class="mg-dc-value">{{generatedShop.shopkeeper.socialDCs.theftDC}}</span>
+          </div>
+          <div class="mg-dc-item">
+            <span class="mg-dc-label">Perception</span>
+            <span class="mg-dc-value">{{generatedShop.shopkeeper.socialDCs.perceptionPassive}}</span>
+          </div>
+          <div class="mg-dc-item">
+            <span class="mg-dc-label">Insight</span>
+            <span class="mg-dc-value">{{generatedShop.shopkeeper.socialDCs.insightPassive}}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mg-preview-section">
+        <h4><i class="fas fa-shield-alt"></i> Stat Block</h4>
+        <div class="mg-stat-block">
+          <span>{{generatedShop.shopkeeper.statBlock.baseNPC}} (CR {{generatedShop.shopkeeper.statBlock.cr}})</span>
+          · AC {{generatedShop.shopkeeper.statBlock.ac}}
+          · HP {{generatedShop.shopkeeper.statBlock.hp}}
+          · CHA {{generatedShop.shopkeeper.statBlock.cha}}
+        </div>
+      </div>
+
+      {{#if generatedShop.shopkeeper.bias}}
+        <div class="mg-preview-section mg-bias-section">
+          <h4><i class="fas fa-exclamation-triangle"></i> Bias</h4>
+          <div class="mg-bias-details">
+            <span class="mg-bias-severity mg-bias-{{generatedShop.shopkeeper.bias.severity}}">
+              {{generatedShop.shopkeeper.bias.severity}}
+            </span>
+            vs. {{generatedShop.shopkeeper.bias.targetValue}}
+            ({{generatedShop.shopkeeper.bias.targetType}})
+            {{#if generatedShop.shopkeeper.bias.priceMarkup}}
+              — +{{generatedShop.shopkeeper.bias.priceMarkup}}% markup
+            {{/if}}
+            <div class="mg-bias-rp">{{generatedShop.shopkeeper.bias.rpCue}}</div>
+          </div>
+        </div>
+      {{/if}}
+
+      <div class="mg-preview-section">
+        <h4><i class="fas fa-boxes"></i> Inventory ({{generatedShop.inventory.length}} items)</h4>
+        <div class="mg-inventory-summary">
+          {{#each generatedShop.inventory}}
+            <div class="mg-inv-item {{#if (ne this.rarity 'common')}}mg-rarity-{{this.rarity}}{{/if}}">
+              <span class="mg-inv-name">{{this.name}}</span>
+              <span class="mg-inv-price">
+                {{#if this.listedPrice.gp}}{{this.listedPrice.gp}} gp{{/if}}
+                {{#if this.listedPrice.sp}} {{this.listedPrice.sp}} sp{{/if}}
+                {{#if this.listedPrice.cp}} {{this.listedPrice.cp}} cp{{/if}}
+              </span>
+              {{#if this.requiresAttunement}}
+                <span class="mg-attunement-flag" title="Requires Attunement"><i class="fas fa-link"></i></span>
+              {{/if}}
+            </div>
+          {{/each}}
+        </div>
+      </div>
+
+      <button class="save-shop-btn" type="button">
+        <i class="fas fa-save"></i> Save Shop
+      </button>
+    </div>
+  {{/if}}
+</div>

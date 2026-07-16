@@ -4,26 +4,67 @@
     "Settings": {
       "PlayerVisibility": {
         "Name": "Player Shop Visibility",
-        "Hint": "Controls whether players can browse shop inventory directly.",
+        "Hint": "Controls whether players can browse shop inventory directly, or if the DM relays all information.",
         "DMOnly": "DM Only",
         "PlayersBrowse": "Players Can Browse"
       },
       "BuybackRate": {
         "Name": "Default Buyback Rate",
-        "Hint": "Default percentage of base price offered when players sell items (0.50 = 50%)."
+        "Hint": "Default percentage of base price offered when players sell items to a shop (0.50 = 50%)."
       },
       "AutoDetectPartyLevel": {
         "Name": "Auto-Detect Party Level",
-        "Hint": "Automatically calculate average party level from active player characters."
+        "Hint": "Automatically calculate average party level from active player characters for item tier gating."
       },
       "ManualPartyLevel": {
         "Name": "Manual Party Level",
-        "Hint": "Set party level manually when auto-detect is disabled."
+        "Hint": "Set party level manually when auto-detect is disabled. Used for item rarity gating."
       },
       "EnableBias": {
         "Name": "Enable Shopkeeper Bias",
-        "Hint": "Allow shopkeepers to occasionally generate with negative biases against certain races or classes."
+        "Hint": "Allow shopkeepers to occasionally generate with negative biases against certain races or classes. Purely for RP flavor."
       }
+    },
+    "ShopManager": {
+      "Title": "Shop Manager",
+      "CreateNew": "Create New Shop",
+      "NoShops": "No shops yet. Click \"Create New Shop\" to get started.",
+      "DeleteConfirm": "Are you sure you want to delete this shop? This cannot be undone.",
+      "Deleted": "Shop deleted.",
+      "Open": "Open Shop",
+      "Delete": "Delete Shop"
+    },
+    "ShopConfig": {
+      "Title": "Create New Shop",
+      "StoreType": "Store Type",
+      "Affluence": "Town Affluence",
+      "Generate": "Generate Shop",
+      "Save": "Save Shop",
+      "Preview": "Preview",
+      "ShopName": "Shop Name",
+      "Description": "Description",
+      "Shopkeeper": "Shopkeeper",
+      "SocialDCs": "Social DCs",
+      "StatBlock": "Stat Block",
+      "Bias": "Bias",
+      "Inventory": "Inventory",
+      "PartyInfo": "Party Level",
+      "MaxRarity": "Max Rarity",
+      "GenerateFirst": "Generate a shop first before saving."
+    },
+    "DCs": {
+      "Haggle": "Haggle",
+      "Intimidate": "Intimidate",
+      "Theft": "Theft",
+      "Perception": "Perception",
+      "Insight": "Insight"
+    },
+    "Rarity": {
+      "Common": "Common",
+      "Uncommon": "Uncommon",
+      "Rare": "Rare",
+      "VeryRare": "Very Rare",
+      "Legendary": "Legendary"
     }
   }
 }

@@ -1,1 +1,40 @@
-{{!-- Shop Manager — DM sidebar panel and shop list. Phase 2: To be implemented --}}
+<div class="merchants-guild-manager">
+  <div class="mg-header">
+    <h2><i class="fas fa-store"></i> Shop Manager</h2>
+    <button class="create-shop-btn" type="button">
+      <i class="fas fa-plus"></i> Create New Shop
+    </button>
+  </div>
+
+  {{#if hasShops}}
+    <div class="mg-shop-list">
+      {{#each shops}}
+        <div class="mg-shop-entry" data-shop-id="{{this.id}}" data-shop-name="{{this.name}}">
+          <div class="mg-shop-info">
+            <div class="mg-shop-name">{{this.name}}</div>
+            <div class="mg-shop-meta">
+              <span class="mg-type-badge">{{this.typeLabel}}</span>
+              <span class="mg-affluence-badge mg-affluence-{{this.affluenceTier}}">{{this.affluenceLabel}}</span>
+            </div>
+            <div class="mg-shop-keeper">
+              <i class="fas fa-user"></i> {{this.shopkeeperName}}
+            </div>
+          </div>
+          <div class="mg-shop-actions">
+            <button class="shop-open-btn" type="button" title="Open Shop">
+              <i class="fas fa-door-open"></i>
+            </button>
+            <button class="shop-delete-btn" type="button" title="Delete Shop">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="mg-empty-state">
+      <i class="fas fa-store-slash"></i>
+      <p>No shops yet. Click "Create New Shop" to get started.</p>
+    </div>
+  {{/if}}
+</div>
