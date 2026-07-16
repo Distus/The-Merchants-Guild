@@ -1,0 +1,29 @@
+{
+  "MERCHANTS_GUILD": {
+    "ModuleTitle": "The Merchant's Guild",
+    "Settings": {
+      "PlayerVisibility": {
+        "Name": "Player Shop Visibility",
+        "Hint": "Controls whether players can browse shop inventory directly.",
+        "DMOnly": "DM Only",
+        "PlayersBrowse": "Players Can Browse"
+      },
+      "BuybackRate": {
+        "Name": "Default Buyback Rate",
+        "Hint": "Default percentage of base price offered when players sell items (0.50 = 50%)."
+      },
+      "AutoDetectPartyLevel": {
+        "Name": "Auto-Detect Party Level",
+        "Hint": "Automatically calculate average party level from active player characters."
+      },
+      "ManualPartyLevel": {
+        "Name": "Manual Party Level",
+        "Hint": "Set party level manually when auto-detect is disabled."
+      },
+      "EnableBias": {
+        "Name": "Enable Shopkeeper Bias",
+        "Hint": "Allow shopkeepers to occasionally generate with negative biases against certain races or classes."
+      }
+    }
+  }
+}

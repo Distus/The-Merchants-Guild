@@ -1,0 +1,16 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (if we add build tools later)
+node_modules/
+package-lock.json
+
+# Zip releases (built locally, uploaded to GitHub Releases)
+*.zip

@@ -1,0 +1,6 @@
+/**
+ * Shop Config
+ * Create/edit shop dialog
+ */
+
+// Phase 2: To be implemented
