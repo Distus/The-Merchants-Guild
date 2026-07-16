@@ -8,6 +8,7 @@
 import { getAllShops, deleteShop, getModuleId } from "../module.js";
 import { STORE_TYPES, AFFLUENCE_TIERS } from "../shop-generator.js";
 import { ShopConfig } from "./shop-config.js";
+import { ShopViewDM } from "./shop-view-dm.js";
 
 export class ShopManager extends Application {
 
@@ -78,8 +79,9 @@ export class ShopManager extends Application {
     html.find(".shop-open-btn").click((ev) => {
       ev.preventDefault();
       const shopId = ev.currentTarget.closest("[data-shop-id]").dataset.shopId;
-      // Phase 3: Will open ShopViewDM
-      ui.notifications.info(`Opening shop ${shopId} — Shop detail view coming in Phase 3`);
+      new ShopViewDM(shopId, {
+        onUpdate: () => this.render(true)
+      }).render(true);
     });
 
     // Delete a shop

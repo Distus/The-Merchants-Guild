@@ -1,1 +1,67 @@
-{{!-- Shop View (Player) — Read-only browse view. Phase 4: To be implemented --}}
+{{#if error}}
+  <div class="mg-empty-state">
+    <i class="fas fa-store-slash"></i>
+    <p>This shop is no longer available.</p>
+  </div>
+{{else}}
+<div class="merchants-guild-player-view">
+  {{!-- Shop Description --}}
+  <div class="mg-player-description">
+    <p>{{description}}</p>
+  </div>
+
+  {{!-- Shopkeeper --}}
+  <div class="mg-player-keeper">
+    <div class="mg-player-keeper-name">
+      <i class="fas fa-user"></i> {{keeperName}}
+    </div>
+    {{#if keeperDescription}}
+      <div class="mg-player-keeper-desc">{{keeperDescription}}</div>
+    {{/if}}
+    {{#if keeperPersonality}}
+      <div class="mg-player-keeper-personality"><em>{{keeperPersonality}}</em></div>
+    {{/if}}
+  </div>
+
+  <hr>
+
+  {{!-- Inventory --}}
+  <div class="mg-player-inventory">
+    <h3>Wares</h3>
+    {{#each inventory}}
+      <div class="mg-player-item {{#if this.isMagic}}mg-player-magic-item{{/if}}">
+        <div class="mg-player-item-header">
+          <span class="mg-player-item-name">{{this.name}}</span>
+          <span class="mg-player-item-price">{{this.priceDisplay}}</span>
+        </div>
+        {{#if this.isMagic}}
+          <div class="mg-player-item-desc">
+            {{this.description}}
+          </div>
+        {{/if}}
+      </div>
+    {{/each}}
+
+    {{#if outOfStockCount}}
+      <div class="mg-player-sold-out">
+        <em>{{outOfStockCount}} items are currently sold out.</em>
+      </div>
+    {{/if}}
+  </div>
+
+  {{!-- Player Coins --}}
+  {{#if hasPlayerActor}}
+    <hr>
+    <div class="mg-player-coins">
+      <span class="mg-coin-label">{{playerActorName}}'s Purse:</span>
+      <div class="mg-coin-row">
+        {{#if playerCoins.pp}}<span class="mg-coin mg-coin-pp">{{playerCoins.pp}} pp</span>{{/if}}
+        <span class="mg-coin mg-coin-gp">{{playerCoins.gp}} gp</span>
+        {{#if playerCoins.ep}}<span class="mg-coin mg-coin-ep">{{playerCoins.ep}} ep</span>{{/if}}
+        <span class="mg-coin mg-coin-sp">{{playerCoins.sp}} sp</span>
+        <span class="mg-coin mg-coin-cp">{{playerCoins.cp}} cp</span>
+      </div>
+    </div>
+  {{/if}}
+</div>
+{{/if}}

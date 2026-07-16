@@ -1,1 +1,210 @@
-{{!-- Shop View (DM) — Inventory, shopkeeper, transactions tabs. Phase 3: To be implemented --}}
+{{#if error}}
+  <div class="mg-empty-state">
+    <i class="fas fa-exclamation-triangle"></i>
+    <p>Shop not found. It may have been deleted.</p>
+  </div>
+{{else}}
+<div class="merchants-guild-dm-view">
+  {{!-- Header --}}
+  <div class="mg-dm-header">
+    <div>
+      <span class="mg-type-badge">{{typeLabel}}</span>
+      <span class="mg-affluence-badge mg-affluence-{{shop.affluenceTier}}">{{affluenceLabel}}</span>
+    </div>
+    {{#if canShareToPlayers}}
+      <button class="share-to-players-btn" type="button" title="Open for Players">
+        <i class="fas fa-eye"></i> Open for Players
+      </button>
+    {{/if}}
+  </div>
+
+  {{!-- Tabs --}}
+  <div class="mg-tabs">
+    <button class="mg-tab-btn {{#if isInventoryTab}}active{{/if}}" data-tab="inventory" type="button">
+      <i class="fas fa-boxes"></i> Inventory ({{inventoryCount}})
+    </button>
+    <button class="mg-tab-btn {{#if isShopkeeperTab}}active{{/if}}" data-tab="shopkeeper" type="button">
+      <i class="fas fa-user"></i> Shopkeeper
+    </button>
+    <button class="mg-tab-btn {{#if isTransactionsTab}}active{{/if}}" data-tab="transactions" type="button">
+      <i class="fas fa-receipt"></i> Transactions ({{transactionCount}})
+    </button>
+  </div>
+
+  {{!-- ============================================================ --}}
+  {{!-- Inventory Tab --}}
+  {{!-- ============================================================ --}}
+  {{#if isInventoryTab}}
+  <div class="mg-tab-content">
+    <div class="mg-inv-toolbar">
+      <button class="add-item-btn" type="button"><i class="fas fa-plus"></i> Add Item</button>
+      <button class="restock-btn" type="button"><i class="fas fa-sync"></i> Restock</button>
+      <span class="mg-inv-count">{{magicItemCount}} magic items</span>
+    </div>
+
+    <div class="mg-inv-table">
+      <div class="mg-inv-header-row">
+        <span class="mg-inv-col-name">Item</span>
+        <span class="mg-inv-col-price">Price (GP)</span>
+        <span class="mg-inv-col-qty">Qty</span>
+        <span class="mg-inv-col-flags">Flags</span>
+        <span class="mg-inv-col-actions">Actions</span>
+      </div>
+      {{#each inventory}}
+        <div class="mg-inv-row {{#if this.isOutOfStock}}mg-out-of-stock{{/if}} {{#if this.isMagic}}mg-rarity-{{this.rarity}}{{/if}}">
+          <span class="mg-inv-col-name" title="{{this.descriptionDM}}">
+            {{this.name}}
+          </span>
+          <span class="mg-inv-col-price">
+            <input type="number" class="mg-edit-price" data-idx="{{this.idx}}"
+                   value="{{this.listedPrice.gp}}" min="0" step="1">
+          </span>
+          <span class="mg-inv-col-qty">{{this.quantityDisplay}}</span>
+          <span class="mg-inv-col-flags">
+            {{#if this.requiresAttunement}}
+              <span class="mg-attunement-flag" title="Requires Attunement"><i class="fas fa-link"></i></span>
+            {{/if}}
+            {{#if this.isMagic}}
+              <span class="mg-rarity-flag" title="{{this.rarity}}"><i class="fas fa-sparkles"></i></span>
+            {{/if}}
+          </span>
+          <span class="mg-inv-col-actions">
+            {{#unless this.isOutOfStock}}
+              <button class="mg-sell-to-player" data-idx="{{this.idx}}" title="Sell to Player" type="button">
+                <i class="fas fa-coins"></i>
+              </button>
+            {{/unless}}
+            <button class="mg-remove-item" data-idx="{{this.idx}}" title="Remove Item" type="button">
+              <i class="fas fa-times"></i>
+            </button>
+          </span>
+        </div>
+      {{/each}}
+    </div>
+  </div>
+  {{/if}}
+
+  {{!-- ============================================================ --}}
+  {{!-- Shopkeeper Tab --}}
+  {{!-- ============================================================ --}}
+  {{#if isShopkeeperTab}}
+  <div class="mg-tab-content">
+    <div class="mg-keeper-card">
+      <h3>{{keeper.name}}</h3>
+      <div class="mg-keeper-meta">
+        {{keeper.race}} · {{keeper.gender}}
+      </div>
+      <div class="mg-keeper-description">
+        {{keeper.physicalDescription}}
+      </div>
+      <div class="mg-keeper-personality">
+        <strong>Personality:</strong> {{keeper.personality}}
+      </div>
+      {{#if keeper.rpHints}}
+        <div class="mg-keeper-rp">
+          <strong>RP Hints:</strong> {{keeper.rpHints}}
+        </div>
+      {{/if}}
+    </div>
+
+    <div class="mg-preview-section">
+      <h4><i class="fas fa-dice-d20"></i> Social DCs</h4>
+      <div class="mg-dc-grid">
+        <div class="mg-dc-item">
+          <span class="mg-dc-label">Haggle</span>
+          <span class="mg-dc-value">{{dcs.haggleDC}}</span>
+        </div>
+        <div class="mg-dc-item">
+          <span class="mg-dc-label">Intimidate</span>
+          <span class="mg-dc-value">{{dcs.intimidateDC}}</span>
+        </div>
+        <div class="mg-dc-item">
+          <span class="mg-dc-label">Theft</span>
+          <span class="mg-dc-value">{{dcs.theftDC}}</span>
+        </div>
+        <div class="mg-dc-item">
+          <span class="mg-dc-label">Perception</span>
+          <span class="mg-dc-value">{{dcs.perceptionPassive}}</span>
+        </div>
+        <div class="mg-dc-item">
+          <span class="mg-dc-label">Insight</span>
+          <span class="mg-dc-value">{{dcs.insightPassive}}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mg-preview-section">
+      <h4><i class="fas fa-shield-alt"></i> Stat Block</h4>
+      <div class="mg-stat-block-full">
+        <div class="mg-stat-header">{{stats.baseNPC}} (CR {{stats.cr}})</div>
+        <div class="mg-stat-row">
+          <span>AC {{stats.ac}}</span> · <span>HP {{stats.hp}}</span>
+        </div>
+        <div class="mg-stat-abilities">
+          <div class="mg-ability">STR {{stats.str}}</div>
+          <div class="mg-ability">DEX {{stats.dex}}</div>
+          <div class="mg-ability">CON {{stats.con}}</div>
+          <div class="mg-ability">INT {{stats.int}}</div>
+          <div class="mg-ability">WIS {{stats.wis}}</div>
+          <div class="mg-ability">CHA {{stats.cha}}</div>
+        </div>
+        {{#if stats.abilities.length}}
+          <div class="mg-stat-features">
+            <strong>Features:</strong>
+            {{#each stats.abilities}}
+              <div>• {{this}}</div>
+            {{/each}}
+          </div>
+        {{/if}}
+      </div>
+    </div>
+
+    {{#if bias}}
+      <div class="mg-preview-section mg-bias-section">
+        <h4><i class="fas fa-exclamation-triangle"></i> Bias</h4>
+        <div class="mg-bias-details">
+          <span class="mg-bias-severity mg-bias-{{bias.severity}}">
+            {{bias.severity}}
+          </span>
+          vs. {{bias.targetValue}} ({{bias.targetType}})
+          {{#if bias.priceMarkup}}
+            — +{{bias.priceMarkup}}% markup
+          {{/if}}
+          <div class="mg-bias-rp">{{bias.rpCue}}</div>
+        </div>
+      </div>
+    {{/if}}
+  </div>
+  {{/if}}
+
+  {{!-- ============================================================ --}}
+  {{!-- Transactions Tab --}}
+  {{!-- ============================================================ --}}
+  {{#if isTransactionsTab}}
+  <div class="mg-tab-content">
+    {{#if transactions.length}}
+      <div class="mg-transaction-log">
+        {{#each transactions}}
+          <div class="mg-transaction-entry mg-txn-{{this.type}}">
+            <div class="mg-txn-icon">
+              {{#if (eq this.type "sale")}}<i class="fas fa-arrow-right"></i>{{/if}}
+              {{#if (eq this.type "buyback")}}<i class="fas fa-arrow-left"></i>{{/if}}
+            </div>
+            <div class="mg-txn-details">
+              <span class="mg-txn-item">{{this.itemName}}</span>
+              <span class="mg-txn-actor">→ {{this.actorName}}</span>
+            </div>
+            <div class="mg-txn-price">{{this.price}} gp</div>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="mg-empty-state">
+        <i class="fas fa-receipt"></i>
+        <p>No transactions yet.</p>
+      </div>
+    {{/if}}
+  </div>
+  {{/if}}
+</div>
+{{/if}}

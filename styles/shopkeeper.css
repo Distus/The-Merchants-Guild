@@ -391,3 +391,413 @@
 .mg-rarity-rare .mg-inv-name { color: #2980b9; }
 .mg-rarity-very-rare .mg-inv-name { color: #8e44ad; }
 .mg-rarity-legendary .mg-inv-name { color: #c4a035; font-weight: bold; }
+
+/* ============================================================
+   DM Shop View
+   ============================================================ */
+
+.mg-dm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.share-to-players-btn {
+  background: #4b6584;
+  color: #fff;
+  border: 1px solid #3d566e;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 0.8em;
+}
+
+.share-to-players-btn:hover {
+  background: #3d566e;
+}
+
+/* Tabs */
+
+.mg-tabs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #7a7971;
+}
+
+.mg-tab-btn {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  padding: 6px 12px;
+  font-size: 0.85em;
+  cursor: pointer;
+}
+
+.mg-tab-btn.active {
+  background: #fff;
+  border-color: #7a7971;
+  font-weight: bold;
+}
+
+.mg-tab-btn:hover:not(.active) {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.mg-tab-content {
+  overflow-y: auto;
+}
+
+/* Inventory Toolbar */
+
+.mg-inv-toolbar {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.mg-inv-toolbar button {
+  background: #4b6584;
+  color: #fff;
+  border: 1px solid #3d566e;
+  border-radius: 3px;
+  padding: 4px 10px;
+  font-size: 0.8em;
+}
+
+.mg-inv-toolbar button:hover {
+  background: #3d566e;
+}
+
+.mg-inv-count {
+  font-size: 0.8em;
+  color: #888;
+  margin-left: auto;
+}
+
+/* Inventory Table */
+
+.mg-inv-table {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+.mg-inv-header-row {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.08);
+  font-size: 0.75em;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #666;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.mg-inv-row {
+  display: flex;
+  align-items: center;
+  padding: 3px 8px;
+  font-size: 0.85em;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.mg-inv-row:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.mg-inv-row.mg-out-of-stock {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+.mg-inv-col-name {
+  flex: 3;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mg-inv-col-price {
+  flex: 1.2;
+}
+
+.mg-inv-col-price input {
+  width: 60px;
+  padding: 1px 4px;
+  font-size: 0.9em;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+  text-align: right;
+}
+
+.mg-inv-col-qty {
+  flex: 0.5;
+  text-align: center;
+  font-size: 0.9em;
+}
+
+.mg-inv-col-flags {
+  flex: 0.6;
+  text-align: center;
+}
+
+.mg-inv-col-actions {
+  flex: 0.8;
+  display: flex;
+  gap: 2px;
+  justify-content: flex-end;
+}
+
+.mg-inv-col-actions button {
+  background: none;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+  padding: 2px 5px;
+  font-size: 0.8em;
+  cursor: pointer;
+}
+
+.mg-inv-col-actions button:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.mg-remove-item:hover {
+  color: #c0392b;
+  border-color: #c0392b;
+}
+
+.mg-rarity-flag { color: #8e44ad; }
+
+/* Rarity row coloring */
+.mg-inv-row.mg-rarity-uncommon .mg-inv-col-name { color: #27ae60; }
+.mg-inv-row.mg-rarity-rare .mg-inv-col-name { color: #2980b9; }
+.mg-inv-row.mg-rarity-very-rare .mg-inv-col-name { color: #8e44ad; }
+.mg-inv-row.mg-rarity-legendary .mg-inv-col-name { color: #c4a035; font-weight: bold; }
+
+/* Stat Block Full */
+
+.mg-stat-block-full {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.mg-stat-header {
+  font-weight: bold;
+  font-size: 1em;
+  margin-bottom: 4px;
+}
+
+.mg-stat-row {
+  font-size: 0.9em;
+  margin-bottom: 6px;
+}
+
+.mg-stat-abilities {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.mg-ability {
+  text-align: center;
+  font-size: 0.8em;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+  padding: 4px 2px;
+}
+
+.mg-stat-features {
+  font-size: 0.85em;
+  margin-top: 4px;
+}
+
+/* Keeper Card */
+
+.mg-keeper-card {
+  margin-bottom: 12px;
+}
+
+.mg-keeper-card h3 {
+  font-size: 1.1em;
+  margin-bottom: 4px;
+}
+
+/* Transaction Log */
+
+.mg-transaction-log {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mg-transaction-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+
+.mg-txn-icon {
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+}
+
+.mg-txn-sale .mg-txn-icon { color: #27ae60; }
+.mg-txn-buyback .mg-txn-icon { color: #e67e22; }
+
+.mg-txn-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.mg-txn-item {
+  font-weight: bold;
+}
+
+.mg-txn-actor {
+  color: #666;
+  margin-left: 4px;
+}
+
+.mg-txn-price {
+  flex-shrink: 0;
+  font-weight: bold;
+}
+
+/* ============================================================
+   Player Shop View
+   ============================================================ */
+
+.mg-player-description {
+  font-style: italic;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 4px;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.mg-player-keeper {
+  margin-bottom: 8px;
+}
+
+.mg-player-keeper-name {
+  font-weight: bold;
+  font-size: 1.05em;
+  margin-bottom: 2px;
+}
+
+.mg-player-keeper-desc {
+  font-size: 0.9em;
+  margin-bottom: 2px;
+}
+
+.mg-player-keeper-personality {
+  font-size: 0.85em;
+  color: #666;
+}
+
+/* Player Inventory */
+
+.mg-player-inventory h3 {
+  font-size: 1em;
+  margin-bottom: 8px;
+}
+
+.mg-player-item {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+}
+
+.mg-player-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.mg-player-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mg-player-item-name {
+  font-size: 0.9em;
+}
+
+.mg-player-magic-item .mg-player-item-name {
+  font-style: italic;
+}
+
+.mg-player-item-price {
+  font-size: 0.85em;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.mg-player-item-desc {
+  font-size: 0.8em;
+  color: #555;
+  padding-top: 4px;
+  line-height: 1.4;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease;
+}
+
+.mg-player-item-desc.expanded {
+  max-height: 200px;
+}
+
+.mg-player-sold-out {
+  font-size: 0.85em;
+  color: #888;
+  text-align: center;
+  padding: 8px;
+}
+
+/* Player Coins */
+
+.mg-player-coins {
+  padding: 8px 0;
+}
+
+.mg-coin-label {
+  font-size: 0.85em;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.mg-coin-row {
+  display: flex;
+  gap: 8px;
+}
+
+.mg-coin {
+  font-size: 0.85em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.mg-coin-pp { color: #95a5a6; }
+.mg-coin-gp { color: #c4a035; }
+.mg-coin-ep { color: #7f8c8d; }
+.mg-coin-sp { color: #bdc3c7; }
+.mg-coin-cp { color: #a0522d; }
