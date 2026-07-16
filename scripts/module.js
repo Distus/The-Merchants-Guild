@@ -206,7 +206,28 @@ export function getModuleId() {
 Hooks.once("init", () => {
   console.log("The Merchant's Guild | Initializing module");
   registerSettings();
+  registerHandlebarsHelpers();
 });
+
+/**
+ * Register custom Handlebars helpers used in templates
+ */
+function registerHandlebarsHelpers() {
+  // Equality check: {{#if (eq a b)}}
+  Handlebars.registerHelper("eq", function (a, b) {
+    return a === b;
+  });
+
+  // Not-equal check: {{#if (ne a b)}}
+  Handlebars.registerHelper("ne", function (a, b) {
+    return a !== b;
+  });
+
+  // Greater-than: {{#if (gt a b)}}
+  Handlebars.registerHelper("gt", function (a, b) {
+    return a > b;
+  });
+}
 
 Hooks.once("ready", async () => {
   console.log("The Merchant's Guild | Module ready");
