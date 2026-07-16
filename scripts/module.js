@@ -14,23 +14,45 @@ const MODULE_ID = "the-merchants-guild";
 // ============================================================
 
 function registerSettings() {
+  // --- Hidden setting for shop data storage ---
+  game.settings.register(MODULE_ID, "shopData", {
+    name: "Shop Data",
+    hint: "Internal storage for shop data. Do not modify.",
+    scope: "world",
+    config: false,
+    type: Object,
+    default: {},
+    requiresReload: false
+  });
+
+  // --- Menu button to open Shop Manager from Settings ---
+  game.settings.registerMenu(MODULE_ID, "shopManagerMenu", {
+    name: "Open Shop Manager",
+    label: "Shop Manager",
+    hint: "Open the Shop Manager to create, view, and manage shops.",
+    icon: "fas fa-store",
+    type: ShopManagerMenuApp,
+    restricted: true // GM only
+  });
+
+  // --- Visible settings ---
   game.settings.register(MODULE_ID, "playerShopVisibility", {
-    name: game.i18n.localize("MERCHANTS_GUILD.Settings.PlayerVisibility.Name"),
-    hint: game.i18n.localize("MERCHANTS_GUILD.Settings.PlayerVisibility.Hint"),
+    name: game.i18n?.localize("MERCHANTS_GUILD.Settings.PlayerVisibility.Name") || "Player Shop Visibility",
+    hint: game.i18n?.localize("MERCHANTS_GUILD.Settings.PlayerVisibility.Hint") || "Controls whether players can browse shop inventory directly.",
     scope: "world",
     config: true,
     type: String,
     choices: {
-      "dm-only": game.i18n.localize("MERCHANTS_GUILD.Settings.PlayerVisibility.DMOnly"),
-      "players-browse": game.i18n.localize("MERCHANTS_GUILD.Settings.PlayerVisibility.PlayersBrowse")
+      "dm-only": "DM Only",
+      "players-browse": "Players Can Browse"
     },
     default: "dm-only",
     requiresReload: false
   });
 
   game.settings.register(MODULE_ID, "defaultBuybackRate", {
-    name: game.i18n.localize("MERCHANTS_GUILD.Settings.BuybackRate.Name"),
-    hint: game.i18n.localize("MERCHANTS_GUILD.Settings.BuybackRate.Hint"),
+    name: game.i18n?.localize("MERCHANTS_GUILD.Settings.BuybackRate.Name") || "Default Buyback Rate",
+    hint: game.i18n?.localize("MERCHANTS_GUILD.Settings.BuybackRate.Hint") || "Default percentage of base price offered when players sell items.",
     scope: "world",
     config: true,
     type: Number,
@@ -40,8 +62,8 @@ function registerSettings() {
   });
 
   game.settings.register(MODULE_ID, "autoDetectPartyLevel", {
-    name: game.i18n.localize("MERCHANTS_GUILD.Settings.AutoDetectPartyLevel.Name"),
-    hint: game.i18n.localize("MERCHANTS_GUILD.Settings.AutoDetectPartyLevel.Hint"),
+    name: game.i18n?.localize("MERCHANTS_GUILD.Settings.AutoDetectPartyLevel.Name") || "Auto-Detect Party Level",
+    hint: game.i18n?.localize("MERCHANTS_GUILD.Settings.AutoDetectPartyLevel.Hint") || "Automatically calculate average party level from active player characters.",
     scope: "world",
     config: true,
     type: Boolean,
@@ -50,8 +72,8 @@ function registerSettings() {
   });
 
   game.settings.register(MODULE_ID, "manualPartyLevel", {
-    name: game.i18n.localize("MERCHANTS_GUILD.Settings.ManualPartyLevel.Name"),
-    hint: game.i18n.localize("MERCHANTS_GUILD.Settings.ManualPartyLevel.Hint"),
+    name: game.i18n?.localize("MERCHANTS_GUILD.Settings.ManualPartyLevel.Name") || "Manual Party Level",
+    hint: game.i18n?.localize("MERCHANTS_GUILD.Settings.ManualPartyLevel.Hint") || "Set party level manually when auto-detect is disabled.",
     scope: "world",
     config: true,
     type: Number,
@@ -61,13 +83,55 @@ function registerSettings() {
   });
 
   game.settings.register(MODULE_ID, "enableShopkeeperBias", {
-    name: game.i18n.localize("MERCHANTS_GUILD.Settings.EnableBias.Name"),
-    hint: game.i18n.localize("MERCHANTS_GUILD.Settings.EnableBias.Hint"),
+    name: game.i18n?.localize("MERCHANTS_GUILD.Settings.EnableBias.Name") || "Enable Shopkeeper Bias",
+    hint: game.i18n?.localize("MERCHANTS_GUILD.Settings.EnableBias.Hint") || "Allow shopkeepers to occasionally generate with negative biases.",
     scope: "world",
     config: true,
     type: Boolean,
     default: true,
     requiresReload: false
+  });
+}
+
+/**
+ * Dummy FormApplication class used by registerMenu to open the Shop Manager
+ * registerMenu requires a FormApplication type, so this just opens ShopManager and closes itself
+ */
+class ShopManagerMenuApp extends FormApplication {
+  constructor(...args) {
+    super(...args);
+    ShopManager.open();
+    this.close();
+  }
+
+  async _updateObject() {}
+
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: "merchants-guild-menu-launcher",
+      title: "Shop Manager",
+      template: `modules/${MODULE_ID}/templates/shop-manager.hbs`,
+      width: 1,
+      height: 1
+    });
+  }
+}
+
+// ============================================================
+// Handlebars Helpers
+// ============================================================
+
+function registerHandlebarsHelpers() {
+  Handlebars.registerHelper("eq", function (a, b) {
+    return a === b;
+  });
+
+  Handlebars.registerHelper("ne", function (a, b) {
+    return a !== b;
+  });
+
+  Handlebars.registerHelper("gt", function (a, b) {
+    return a > b;
   });
 }
 
@@ -83,16 +147,13 @@ export function getPartyLevel() {
   const autoDetect = game.settings.get(MODULE_ID, "autoDetectPartyLevel");
 
   if (autoDetect) {
-    // Get all player-owned characters
     const playerActors = game.actors.filter(a =>
       a.type === "character" && a.hasPlayerOwner
     );
 
     if (playerActors.length === 0) return 1;
 
-    // Average their levels, rounded down
     const totalLevels = playerActors.reduce((sum, actor) => {
-      // dnd5e stores level in system.details.level
       const level = actor.system?.details?.level || 1;
       return sum + level;
     }, 0);
@@ -104,17 +165,20 @@ export function getPartyLevel() {
 }
 
 // ============================================================
-// Data Storage — Shops stored as world flags
+// Data Storage — Shops stored as a world-scoped setting
 // ============================================================
-
-const SHOPS_FLAG_KEY = "shops";
 
 /**
  * Get all saved shops
  * @returns {object} Map of shop ID -> shop object
  */
 export function getAllShops() {
-  return game.world.getFlag(MODULE_ID, SHOPS_FLAG_KEY) || {};
+  try {
+    return game.settings.get(MODULE_ID, "shopData") || {};
+  } catch (err) {
+    console.warn("The Merchant's Guild | Could not load shop data:", err);
+    return {};
+  }
 }
 
 /**
@@ -134,7 +198,7 @@ export function getShop(shopId) {
 export async function saveShop(shop) {
   const shops = getAllShops();
   shops[shop.id] = shop;
-  await game.world.setFlag(MODULE_ID, SHOPS_FLAG_KEY, shops);
+  await game.settings.set(MODULE_ID, "shopData", shops);
 }
 
 /**
@@ -144,11 +208,7 @@ export async function saveShop(shop) {
 export async function deleteShop(shopId) {
   const shops = getAllShops();
   delete shops[shopId];
-  // Foundry requires setting the whole flag to persist deletion
-  await game.world.unsetFlag(MODULE_ID, SHOPS_FLAG_KEY);
-  if (Object.keys(shops).length > 0) {
-    await game.world.setFlag(MODULE_ID, SHOPS_FLAG_KEY, shops);
-  }
+  await game.settings.set(MODULE_ID, "shopData", shops);
 }
 
 // ============================================================
@@ -158,9 +218,6 @@ export async function deleteShop(shopId) {
 let _itemPools = null;
 let _magicItems = null;
 
-/**
- * Load item pools and magic items JSON from module data directory
- */
 async function loadDataFiles() {
   try {
     const poolsResponse = await fetch(`modules/${MODULE_ID}/data/item-pools.json`);
@@ -177,16 +234,10 @@ async function loadDataFiles() {
   }
 }
 
-/**
- * Get loaded item pools data
- */
 export function getItemPools() {
   return _itemPools;
 }
 
-/**
- * Get loaded magic items data
- */
 export function getMagicItems() {
   return _magicItems;
 }
@@ -209,64 +260,42 @@ Hooks.once("init", () => {
   registerHandlebarsHelpers();
 });
 
-/**
- * Register custom Handlebars helpers used in templates
- */
-function registerHandlebarsHelpers() {
-  // Equality check: {{#if (eq a b)}}
-  Handlebars.registerHelper("eq", function (a, b) {
-    return a === b;
-  });
-
-  // Not-equal check: {{#if (ne a b)}}
-  Handlebars.registerHelper("ne", function (a, b) {
-    return a !== b;
-  });
-
-  // Greater-than: {{#if (gt a b)}}
-  Handlebars.registerHelper("gt", function (a, b) {
-    return a > b;
-  });
-}
-
 Hooks.once("ready", async () => {
   console.log("The Merchant's Guild | Module ready");
 
-  // Load data files
   await loadDataFiles();
 
-  // Only add GM controls
   if (!game.user.isGM) return;
-
-  // Add sidebar button to Token Controls
   console.log("The Merchant's Guild | GM detected, shop manager available");
 });
 
 /**
  * Add a button to the scene controls for the GM
  * Compatible with Foundry v11-v14
- *
- * v14: controls is an object — add tool to existing group
- * v11-v12: controls is an array — push a new group
  */
 Hooks.on("getSceneControlButtons", (controls) => {
   if (!game.user.isGM) return;
 
   // v14+: controls is an object with named groups
   if (!Array.isArray(controls)) {
-    const targetGroup = controls.tokens || controls.token;
-    if (targetGroup) {
-      targetGroup.tools.merchantsGuild = {
-        name: "merchants-guild",
-        title: "The Merchant's Guild",
-        icon: "fa-solid fa-store",
-        order: 100,
-        button: true,
-        visible: true,
-        onChange: () => {
-          ShopManager.open();
-        }
-      };
+    try {
+      const targetGroup = controls.tokens || controls.token;
+      if (targetGroup && targetGroup.tools) {
+        const toolName = "merchantsGuild";
+        targetGroup.tools[toolName] = {
+          name: toolName,
+          title: "The Merchant's Guild",
+          icon: "fa-solid fa-store",
+          order: 100,
+          button: true,
+          visible: true,
+          onChange: (active) => {
+            ShopManager.open();
+          }
+        };
+      }
+    } catch (err) {
+      console.warn("The Merchant's Guild | Could not add scene control button:", err);
     }
     return;
   }
