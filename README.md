@@ -36,3 +36,4 @@ Designed to make shopping encounters fast for the DM and immersive for players â
 ## License
 
 This project is licensed under the MIT License â€” see the [LICENSE](LICENSE) file for details.
+
