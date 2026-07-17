@@ -51,6 +51,7 @@ export class ShopViewDM extends Application {
       idx,
       priceDisplay: formatPrice(item.listedPrice),
       basePriceDisplay: formatPrice(item.basePrice),
+      priceDecimalGP: priceToGP(item.listedPrice),
       quantityDisplay: item.quantity === null ? "∞" : item.quantity,
       isOutOfStock: item.quantity !== null && item.quantity <= 0,
       isMagic: item.rarity && item.rarity !== "common"
@@ -116,11 +117,11 @@ export class ShopViewDM extends Application {
       this._showAddItemDialog();
     });
 
-    // Inline price editing
-    html.find(".mg-edit-price").on("change", async (ev) => {
+    // Price editing — click to open edit dialog
+    html.find(".mg-price-display").click(async (ev) => {
+      ev.preventDefault();
       const idx = Number(ev.currentTarget.dataset.idx);
-      const newPrice = Number(ev.currentTarget.value);
-      await this._updateItemPrice(idx, newPrice);
+      this._showEditPriceDialog(idx);
     });
 
     // Remove item
@@ -191,12 +192,62 @@ export class ShopViewDM extends Application {
   // Item Management
   // ============================================================
 
-  async _updateItemPrice(idx, newGP) {
+  _showEditPriceDialog(idx) {
     const shop = getShop(this._shopId);
     if (!shop || !shop.inventory[idx]) return;
 
-    shop.inventory[idx].listedPrice = { gp: newGP, sp: 0, cp: 0 };
+    const item = shop.inventory[idx];
+    const price = item.listedPrice || { gp: 0, sp: 0, cp: 0 };
+
+    new Dialog({
+      title: `Edit Price: ${item.name}`,
+      content: `
+        <div style="display:flex;gap:8px;align-items:center;padding:8px 0;">
+          <div class="mg-form-group" style="flex:1;">
+            <label>GP</label>
+            <input type="number" id="mg-price-gp" value="${price.gp || 0}" min="0" step="1" style="width:100%;">
+          </div>
+          <div class="mg-form-group" style="flex:1;">
+            <label>SP</label>
+            <input type="number" id="mg-price-sp" value="${price.sp || 0}" min="0" step="1" style="width:100%;">
+          </div>
+          <div class="mg-form-group" style="flex:1;">
+            <label>CP</label>
+            <input type="number" id="mg-price-cp" value="${price.cp || 0}" min="0" step="1" style="width:100%;">
+          </div>
+        </div>
+      `,
+      buttons: {
+        save: {
+          icon: '<i class="fas fa-check"></i>',
+          label: "Save",
+          callback: async (dialogHtml) => {
+            const gp = Number(dialogHtml.find("#mg-price-gp").val()) || 0;
+            const sp = Number(dialogHtml.find("#mg-price-sp").val()) || 0;
+            const cp = Number(dialogHtml.find("#mg-price-cp").val()) || 0;
+            await this._updateItemPrice(idx, { gp, sp, cp });
+          }
+        },
+        cancel: {
+          icon: '<i class="fas fa-times"></i>',
+          label: "Cancel"
+        }
+      },
+      default: "save"
+    }).render(true);
+  }
+
+  async _updateItemPrice(idx, newPrice) {
+    const shop = getShop(this._shopId);
+    if (!shop || !shop.inventory[idx]) return;
+
+    shop.inventory[idx].listedPrice = {
+      gp: newPrice.gp || 0,
+      sp: newPrice.sp || 0,
+      cp: newPrice.cp || 0
+    };
     await saveShop(shop);
+    this.render(true);
   }
 
   async _removeItem(idx) {
@@ -213,21 +264,92 @@ export class ShopViewDM extends Application {
 
   _showAddItemDialog() {
     const magicItems = getMagicItems();
-    const options = (magicItems.items || []).map(item =>
-      `<option value="${item.key}">${item.name} (${item.rarity})</option>`
+    const allItems = (magicItems.items || []);
+    const options = allItems.map(item =>
+      `<option value="${item.key}" data-rarity="${item.rarity}">${item.name} (${item.rarity})</option>`
     ).join("");
 
     new Dialog({
       title: "Add Item to Shop",
       content: `
-        <div class="mg-form-group">
-          <label>Select a magic item to add:</label>
-          <select id="mg-add-item-select" style="width:100%;margin-top:4px;">
-            ${options}
-          </select>
-          <p style="font-size:0.85em;color:#666;margin-top:6px;">
+        <div class="mg-add-item-tabs" style="display:flex;gap:4px;margin-bottom:10px;">
+          <button type="button" class="mg-add-tab active" data-tab="magic" style="flex:1;padding:6px;">Magic Item</button>
+          <button type="button" class="mg-add-tab" data-tab="custom" style="flex:1;padding:6px;">Custom Item</button>
+        </div>
+
+        <div id="mg-add-magic-panel">
+          <div class="mg-form-group">
+            <label>Search:</label>
+            <input type="text" id="mg-item-search" placeholder="Type to filter..." style="width:100%;margin-bottom:6px;">
+          </div>
+          <div class="mg-form-group">
+            <label>Rarity Filter:</label>
+            <select id="mg-rarity-filter" style="width:100%;margin-bottom:6px;">
+              <option value="all">All Rarities</option>
+              <option value="common">Common</option>
+              <option value="uncommon">Uncommon</option>
+              <option value="rare">Rare</option>
+              <option value="very-rare">Very Rare</option>
+              <option value="legendary">Legendary</option>
+            </select>
+          </div>
+          <div class="mg-form-group">
+            <label>Item:</label>
+            <select id="mg-add-item-select" size="8" style="width:100%;">
+              ${options}
+            </select>
+          </div>
+          <p style="font-size:0.85em;color:#666;margin-top:4px;">
             <i class="fas fa-info-circle"></i> Manual adds bypass party tier gating.
           </p>
+        </div>
+
+        <div id="mg-add-custom-panel" style="display:none;">
+          <div class="mg-form-group">
+            <label>Item Name:</label>
+            <input type="text" id="mg-custom-name" placeholder="e.g. Enchanted Rope" style="width:100%;">
+          </div>
+          <div class="mg-form-group" style="margin-top:6px;">
+            <label>DM Description:</label>
+            <textarea id="mg-custom-desc-dm" rows="2" placeholder="Full mechanical description (DM only)" style="width:100%;"></textarea>
+          </div>
+          <div class="mg-form-group" style="margin-top:6px;">
+            <label>Player Description:</label>
+            <textarea id="mg-custom-desc-player" rows="2" placeholder="Vague flavor text (players see this)" style="width:100%;"></textarea>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:6px;">
+            <div class="mg-form-group" style="flex:1;">
+              <label>GP</label>
+              <input type="number" id="mg-custom-gp" value="0" min="0" style="width:100%;">
+            </div>
+            <div class="mg-form-group" style="flex:1;">
+              <label>SP</label>
+              <input type="number" id="mg-custom-sp" value="0" min="0" style="width:100%;">
+            </div>
+            <div class="mg-form-group" style="flex:1;">
+              <label>CP</label>
+              <input type="number" id="mg-custom-cp" value="0" min="0" style="width:100%;">
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:6px;">
+            <div class="mg-form-group" style="flex:1;">
+              <label>Rarity:</label>
+              <select id="mg-custom-rarity" style="width:100%;">
+                <option value="common">Common</option>
+                <option value="uncommon">Uncommon</option>
+                <option value="rare">Rare</option>
+                <option value="very-rare">Very Rare</option>
+                <option value="legendary">Legendary</option>
+              </select>
+            </div>
+            <div class="mg-form-group" style="flex:1;">
+              <label>Quantity:</label>
+              <input type="number" id="mg-custom-qty" value="1" min="1" style="width:100%;">
+            </div>
+          </div>
+          <div class="mg-form-group" style="margin-top:6px;">
+            <label><input type="checkbox" id="mg-custom-attunement"> Requires Attunement</label>
+          </div>
         </div>
       `,
       buttons: {
@@ -235,8 +357,13 @@ export class ShopViewDM extends Application {
           icon: '<i class="fas fa-plus"></i>',
           label: "Add",
           callback: async (html) => {
-            const key = html.find("#mg-add-item-select").val();
-            await this._addMagicItem(key);
+            const activeTab = html.find(".mg-add-tab.active").data("tab");
+            if (activeTab === "magic") {
+              const key = html.find("#mg-add-item-select").val();
+              if (key) await this._addMagicItem(key);
+            } else {
+              await this._addCustomItem(html);
+            }
           }
         },
         cancel: {
@@ -244,8 +371,77 @@ export class ShopViewDM extends Application {
           label: "Cancel"
         }
       },
-      default: "add"
+      default: "add",
+      render: (html) => {
+        // Tab switching
+        html.find(".mg-add-tab").on("click", (ev) => {
+          html.find(".mg-add-tab").removeClass("active");
+          ev.currentTarget.classList.add("active");
+          const tab = ev.currentTarget.dataset.tab;
+          html.find("#mg-add-magic-panel").toggle(tab === "magic");
+          html.find("#mg-add-custom-panel").toggle(tab === "custom");
+        });
+
+        // Search filter
+        html.find("#mg-item-search").on("input", () => {
+          const search = html.find("#mg-item-search").val().toLowerCase();
+          const rarity = html.find("#mg-rarity-filter").val();
+          this._filterItemList(html, search, rarity);
+        });
+
+        // Rarity filter
+        html.find("#mg-rarity-filter").on("change", () => {
+          const search = html.find("#mg-item-search").val().toLowerCase();
+          const rarity = html.find("#mg-rarity-filter").val();
+          this._filterItemList(html, search, rarity);
+        });
+      }
     }).render(true);
+  }
+
+  _filterItemList(html, search, rarity) {
+    const options = html.find("#mg-add-item-select option");
+    options.each(function () {
+      const name = this.text.toLowerCase();
+      const itemRarity = this.dataset.rarity;
+      const matchesSearch = !search || name.includes(search);
+      const matchesRarity = rarity === "all" || itemRarity === rarity;
+      this.style.display = (matchesSearch && matchesRarity) ? "" : "none";
+    });
+  }
+
+  async _addCustomItem(html) {
+    const shop = getShop(this._shopId);
+    if (!shop) return;
+
+    const name = html.find("#mg-custom-name").val();
+    if (!name) {
+      ui.notifications.warn("Item name is required.");
+      return;
+    }
+
+    const gp = Number(html.find("#mg-custom-gp").val()) || 0;
+    const sp = Number(html.find("#mg-custom-sp").val()) || 0;
+    const cp = Number(html.find("#mg-custom-cp").val()) || 0;
+    const price = { gp, sp, cp };
+
+    shop.inventory.push({
+      itemRef: null,
+      name,
+      descriptionDM: html.find("#mg-custom-desc-dm").val() || name,
+      descriptionPlayer: html.find("#mg-custom-desc-player").val() || name,
+      basePrice: { ...price },
+      listedPrice: { ...price },
+      quantity: Number(html.find("#mg-custom-qty").val()) || 1,
+      rarity: html.find("#mg-custom-rarity").val() || "common",
+      category: "custom",
+      requiresAttunement: html.find("#mg-custom-attunement").is(":checked"),
+      tierRequired: 1
+    });
+
+    await saveShop(shop);
+    ui.notifications.info(`Added ${name} to ${shop.name}.`);
+    this.render(true);
   }
 
   async _addMagicItem(key) {
@@ -320,6 +516,7 @@ export class ShopViewDM extends Application {
           <label>Sell to:</label>
           <select id="mg-sell-actor" style="width:100%;">${actorOptions}</select>
         </div>
+        <div id="mg-sell-coins" style="font-size:0.85em;background:rgba(0,0,0,0.05);padding:6px 8px;border-radius:3px;margin-top:6px;"></div>
         <div class="mg-form-group" style="margin-top:8px;">
           <label>Price (GP):</label>
           <input type="number" id="mg-sell-price" value="${baseGP}" step="0.01" min="0" style="width:100%;">
@@ -346,12 +543,23 @@ export class ShopViewDM extends Application {
       },
       default: "sell",
       render: (html) => {
-        // Auto-adjust price when actor selection changes (bias)
-        html.find("#mg-sell-actor").on("change", () => {
+        const updateActorInfo = () => {
           const actorId = html.find("#mg-sell-actor").val();
           const actor = game.actors.get(actorId);
           if (!actor) return;
 
+          // Show player's purse
+          const currency = actor.system?.currency || {};
+          const coinParts = [];
+          if (currency.pp) coinParts.push(`${currency.pp} pp`);
+          coinParts.push(`${currency.gp || 0} gp`);
+          if (currency.ep) coinParts.push(`${currency.ep} ep`);
+          coinParts.push(`${currency.sp || 0} sp`);
+          coinParts.push(`${currency.cp || 0} cp`);
+          const totalGP = ((currency.pp || 0) * 10 + (currency.gp || 0) + (currency.ep || 0) * 0.5 + (currency.sp || 0) * 0.1 + (currency.cp || 0) * 0.01).toFixed(2);
+          html.find("#mg-sell-coins")[0].innerHTML = `<i class="fas fa-coins"></i> <strong>${actor.name}'s Purse:</strong> ${coinParts.join(" · ")} <span style="color:#888;">(${totalGP} GP total)</span>`;
+
+          // Bias check
           const biasInfo = getBiasInfoForActor(actor, bias);
           const noteEl = html.find("#mg-sell-bias-note")[0];
 
@@ -366,9 +574,10 @@ export class ShopViewDM extends Application {
             html.find("#mg-sell-price").val(baseGP);
             noteEl.innerHTML = "";
           }
-        });
-        // Trigger once on open
-        html.find("#mg-sell-actor").trigger("change");
+        };
+
+        html.find("#mg-sell-actor").on("change", updateActorInfo);
+        updateActorInfo();
       }
     }).render(true);
   }

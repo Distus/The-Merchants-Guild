@@ -6,6 +6,19 @@
     </button>
   </div>
 
+  {{#if hasLocations}}
+    <div class="mg-filter-bar">
+      <label><i class="fas fa-map-marker-alt"></i> Location:</label>
+      <select class="mg-location-filter">
+        <option value="all" {{#if (eq locationFilter "all")}}selected{{/if}}>All Locations ({{totalShopCount}})</option>
+        {{#each locations}}
+          <option value="{{this}}" {{#if (eq this ../locationFilter)}}selected{{/if}}>{{this}}</option>
+        {{/each}}
+        <option value="unassigned" {{#if (eq locationFilter "unassigned")}}selected{{/if}}>Unassigned</option>
+      </select>
+    </div>
+  {{/if}}
+
   {{#if hasShops}}
     <div class="mg-shop-list">
       {{#each shops}}
@@ -15,6 +28,9 @@
             <div class="mg-shop-meta">
               <span class="mg-type-badge">{{this.typeLabel}}</span>
               <span class="mg-affluence-badge mg-affluence-{{this.affluenceTier}}">{{this.affluenceLabel}}</span>
+              {{#if this.location}}
+                <span class="mg-location-badge"><i class="fas fa-map-marker-alt"></i> {{this.location}}</span>
+              {{/if}}
             </div>
             <div class="mg-shop-keeper">
               <i class="fas fa-user"></i> {{this.shopkeeperName}}

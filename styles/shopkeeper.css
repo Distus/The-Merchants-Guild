@@ -801,3 +801,108 @@
 .mg-coin-ep { color: #7f8c8d; }
 .mg-coin-sp { color: #bdc3c7; }
 .mg-coin-cp { color: #a0522d; }
+
+/* Price display — clickable to edit */
+
+.mg-price-display {
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-size: 0.9em;
+}
+
+.mg-price-display:hover {
+  background: rgba(0, 0, 0, 0.08);
+  text-decoration: underline;
+}
+
+/* ============================================================
+   Hover Tooltips
+   ============================================================ */
+
+.mg-has-tooltip {
+  position: relative;
+}
+
+.mg-tooltip {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 100;
+  background: #1a1a2e;
+  color: #eee;
+  border: 1px solid #555;
+  border-radius: 6px;
+  padding: 10px 12px;
+  width: 300px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  pointer-events: none;
+  font-size: 0.85em;
+  line-height: 1.4;
+}
+
+.mg-has-tooltip:hover .mg-tooltip {
+  display: block;
+}
+
+.mg-tooltip-title {
+  font-weight: bold;
+  font-size: 1.05em;
+  margin-bottom: 2px;
+  color: #fff;
+}
+
+.mg-tooltip-rarity {
+  text-transform: capitalize;
+  font-size: 0.8em;
+  margin-bottom: 6px;
+  font-style: italic;
+  color: #aaa;
+}
+
+.mg-tooltip-desc {
+  margin-bottom: 4px;
+}
+
+.mg-tooltip-attune {
+  color: #bb86fc;
+  font-size: 0.85em;
+  margin-top: 4px;
+}
+
+/* ============================================================
+   Location Badges & Filter
+   ============================================================ */
+
+.mg-location-badge {
+  font-size: 0.75em;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: #3d7c98;
+  color: #fff;
+}
+
+.mg-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 6px 8px;
+  background: rgba(0,0,0,0.04);
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.mg-filter-bar label {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.mg-filter-bar select {
+  flex: 1;
+  padding: 3px 6px;
+  border: 1px solid #7a7971;
+  border-radius: 3px;
+  font-size: 0.9em;
+}

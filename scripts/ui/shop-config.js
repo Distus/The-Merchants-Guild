@@ -102,13 +102,15 @@ export class ShopConfig extends Application {
   _generatePreview(html) {
     const storeType = html.find("select[name='storeType']").val();
     const affluenceTier = Number(html.find("select[name='affluenceTier']").val());
+    const location = html.find("input[name='location']").val() || "";
     const biasEnabled = game.settings.get(getModuleId(), "enableShopkeeperBias");
 
     // Generate the shop
     this._generatedShop = generateShop({
       storeType,
       affluenceTier,
-      biasEnabled
+      biasEnabled,
+      location
     });
 
     // Generate inventory
@@ -141,9 +143,11 @@ export class ShopConfig extends Application {
     // Pick up any edits from the form
     const editedName = html.find(".edit-shop-name").val();
     const editedDesc = html.find(".edit-shop-description").val();
+    const editedLocation = html.find("input[name='location']").val();
 
     if (editedName) this._generatedShop.name = editedName;
     if (editedDesc) this._generatedShop.description = editedDesc;
+    if (editedLocation !== undefined) this._generatedShop.location = editedLocation;
 
     // Save to world flags
     await saveShop(this._generatedShop);

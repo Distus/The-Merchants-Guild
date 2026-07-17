@@ -232,7 +232,7 @@ export function generateShopDescription(storeType, shopkeeper) {
  * @param {boolean} [options.biasEnabled=true] - Whether shopkeeper bias system is active
  * @returns {object} Complete shop object matching the spec's Shop Object schema
  */
-export function generateShop({ storeType, affluenceTier, biasEnabled = true }) {
+export function generateShop({ storeType, affluenceTier, biasEnabled = true, location = "" }) {
   const tier = AFFLUENCE_TIERS[affluenceTier] || AFFLUENCE_TIERS[2];
 
   // Generate the shopkeeper first (needed for character-focused description templates)
@@ -252,6 +252,7 @@ export function generateShop({ storeType, affluenceTier, biasEnabled = true }) {
     name,
     type: storeType,
     affluenceTier,
+    location,
     description,
     shopkeeper,
     inventory: [],  // Populated by inventory-generator.js in a later phase

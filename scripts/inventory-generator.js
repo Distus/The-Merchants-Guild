@@ -14,12 +14,15 @@ import { pick, weightedPick } from "./shop-generator.js";
 
 /**
  * Party tier definitions — maps level ranges to max item rarity
+ * maxRarity: items that generate freely at this tier
+ * stretchRarity: items one step above that CAN appear but are rare
+ * consumableMax: consumables are always one tier more generous
  */
 const PARTY_TIERS = [
-  { tier: 1, minLevel: 1,  maxLevel: 4,  maxRarity: "common",    consumableMax: "uncommon" },
-  { tier: 2, minLevel: 5,  maxLevel: 10, maxRarity: "uncommon",  consumableMax: "rare" },
-  { tier: 3, minLevel: 11, maxLevel: 16, maxRarity: "rare",      consumableMax: "very-rare" },
-  { tier: 4, minLevel: 17, maxLevel: 20, maxRarity: "legendary", consumableMax: "legendary" }
+  { tier: 1, minLevel: 1,  maxLevel: 4,  maxRarity: "common",    stretchRarity: "uncommon",  consumableMax: "uncommon" },
+  { tier: 2, minLevel: 5,  maxLevel: 10, maxRarity: "uncommon",  stretchRarity: "rare",      consumableMax: "rare" },
+  { tier: 3, minLevel: 11, maxLevel: 16, maxRarity: "rare",      stretchRarity: "very-rare", consumableMax: "very-rare" },
+  { tier: 4, minLevel: 17, maxLevel: 20, maxRarity: "legendary", stretchRarity: "legendary", consumableMax: "legendary" }
 ];
 
 /**
@@ -36,25 +39,27 @@ const RARITY_ORDER = {
 /**
  * Special item roll chances by affluence tier
  * Each entry: { chance: probability of at least one magic item, rolls: how many items to try }
+ * Even small towns can have the occasional magic item — you never know what a shopkeeper might acquire
  */
 const MAGIC_ITEM_CHANCES = {
-  1: { chance: 0.00, rolls: 0 },   // Hamlet: no magic items
-  2: { chance: 0.05, rolls: 1 },   // Village: 5%, 1 item
-  3: { chance: 0.15, rolls: 2 },   // Town: 15%, up to 2 items
-  4: { chance: 0.30, rolls: 3 },   // City: 30%, up to 3 items
-  5: { chance: 0.50, rolls: 4 }    // Metropolis: 50%, up to 4 items
+  1: { chance: 0.10, rolls: 1 },   // Hamlet: 10%, 1 item — rare but possible
+  2: { chance: 0.25, rolls: 2 },   // Village: 25%, up to 2 items
+  3: { chance: 0.45, rolls: 3 },   // Town: 45%, up to 3 items
+  4: { chance: 0.65, rolls: 4 },   // City: 65%, up to 4 items
+  5: { chance: 0.85, rolls: 5 }    // Metropolis: 85%, up to 5 items
 };
 
 /**
  * Rarity weights for magic item selection by affluence tier
  * Higher tiers have better chances at rarer items
+ * All tiers can potentially get items slightly above their "normal" range
  */
 const RARITY_WEIGHTS_BY_AFFLUENCE = {
-  1: [],
-  2: [{ rarity: "common", weight: 80 }, { rarity: "uncommon", weight: 20 }],
-  3: [{ rarity: "common", weight: 40 }, { rarity: "uncommon", weight: 55 }, { rarity: "rare", weight: 5 }],
-  4: [{ rarity: "uncommon", weight: 50 }, { rarity: "rare", weight: 40 }, { rarity: "very-rare", weight: 10 }],
-  5: [{ rarity: "uncommon", weight: 30 }, { rarity: "rare", weight: 40 }, { rarity: "very-rare", weight: 25 }, { rarity: "legendary", weight: 5 }]
+  1: [{ rarity: "common", weight: 85 }, { rarity: "uncommon", weight: 15 }],
+  2: [{ rarity: "common", weight: 50 }, { rarity: "uncommon", weight: 40 }, { rarity: "rare", weight: 10 }],
+  3: [{ rarity: "common", weight: 25 }, { rarity: "uncommon", weight: 45 }, { rarity: "rare", weight: 25 }, { rarity: "very-rare", weight: 5 }],
+  4: [{ rarity: "uncommon", weight: 30 }, { rarity: "rare", weight: 40 }, { rarity: "very-rare", weight: 25 }, { rarity: "legendary", weight: 5 }],
+  5: [{ rarity: "uncommon", weight: 15 }, { rarity: "rare", weight: 35 }, { rarity: "very-rare", weight: 35 }, { rarity: "legendary", weight: 15 }]
 };
 
 /**
@@ -97,6 +102,7 @@ function getPartyTier(avgLevel) {
 /**
  * Check if an item's rarity is allowed by the current party tier
  * Consumables get one rarity tier higher
+ * Stretch rarity allows items slightly above the party's normal max
  *
  * @param {string} itemRarity
  * @param {string} itemCategory
@@ -107,7 +113,8 @@ function isRarityAllowed(itemRarity, itemCategory, partyTier) {
   const itemRarityRank = RARITY_ORDER[itemRarity] || 1;
   const isConsumable = CONSUMABLE_CATEGORIES.includes(itemCategory);
 
-  const maxRarity = isConsumable ? partyTier.consumableMax : partyTier.maxRarity;
+  // Consumables use consumableMax, others use stretchRarity (which allows one step above normal)
+  const maxRarity = isConsumable ? partyTier.consumableMax : partyTier.stretchRarity;
   const maxRarityRank = RARITY_ORDER[maxRarity] || 1;
 
   return itemRarityRank <= maxRarityRank;
@@ -184,11 +191,11 @@ export function generateInventory({
         const rarityPick = weightedPick(rarityWeights);
         const targetRarity = rarityPick.rarity;
 
-        // Filter by rarity, tier gate, and not already added
+        // Filter by rarity, tier gate (with +1 stretch), and not already added
         const candidates = eligibleByType.filter(item =>
           item.rarity === targetRarity &&
           isRarityAllowed(item.rarity, item.category, partyTier) &&
-          item.tierRequired <= partyTier.tier &&
+          item.tierRequired <= partyTier.tier + 1 &&
           !addedKeys.has(item.key)
         );
 
