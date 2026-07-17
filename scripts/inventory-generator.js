@@ -63,6 +63,70 @@ const RARITY_WEIGHTS_BY_AFFLUENCE = {
 };
 
 /**
+ * Cross-pollination rules — which store types borrow items from others
+ * Higher affluence = more cross-pollination items
+ * Each entry lists source store types and which items to pull (from their base pools)
+ */
+const CROSS_POLLINATION = {
+  "general-goods": {
+    sources: [
+      { type: "apothecary", itemNames: ["Antitoxin (vial)", "Healer's Kit", "Component Pouch"] },
+      { type: "fletcher", itemNames: ["Arrows (20)", "Crossbow Bolts (20)", "Shortbow", "Light Crossbow"] },
+      { type: "blacksmith", itemNames: ["Dagger", "Handaxe", "Quarterstaff", "Spear"] },
+      { type: "armorer", itemNames: ["Padded Armor", "Leather Armor", "Shield"] },
+      { type: "clothier", itemNames: ["Common Clothes", "Traveler's Clothes", "Cloak"] }
+    ],
+    baseCount: 2,   // Hamlet/Village: pick this many cross items
+    scalePer: 2     // Additional items per affluence tier above 1
+  },
+  "tavern": {
+    sources: [
+      { type: "apothecary", itemNames: ["Antitoxin (vial)", "Healer's Kit"] },
+      { type: "general-goods", itemNames: ["Rope, Hempen (50 feet)", "Torch", "Rations (1 day)", "Bedroll"] }
+    ],
+    baseCount: 1,
+    scalePer: 1
+  },
+  "blacksmith": {
+    sources: [
+      { type: "armorer", itemNames: ["Leather Armor", "Shield", "Chain Shirt"] },
+      { type: "fletcher", itemNames: ["Arrows (20)", "Crossbow Bolts (20)"] }
+    ],
+    baseCount: 0,
+    scalePer: 1
+  },
+  "armorer": {
+    sources: [
+      { type: "blacksmith", itemNames: ["Longsword", "Shortsword", "Dagger"] }
+    ],
+    baseCount: 0,
+    scalePer: 1
+  },
+  "fletcher": {
+    sources: [
+      { type: "blacksmith", itemNames: ["Dagger"] },
+      { type: "general-goods", itemNames: ["Rope, Hempen (50 feet)"] }
+    ],
+    baseCount: 0,
+    scalePer: 1
+  },
+  "stables": {
+    sources: [
+      { type: "general-goods", itemNames: ["Rope, Hempen (50 feet)", "Rations (1 day)", "Waterskin"] }
+    ],
+    baseCount: 1,
+    scalePer: 1
+  },
+  "magic-shop": {
+    sources: [
+      { type: "apothecary", itemNames: ["Component Pouch", "Vial"] }
+    ],
+    baseCount: 0,
+    scalePer: 1
+  }
+};
+
+/**
  * How many rotating items to generate (simulates 3d4)
  */
 function rollRotatingCount() {
@@ -172,7 +236,40 @@ export function generateInventory({
     }
   }
 
-  // --- Step 3: Roll for magic/special items ---
+  // --- Step 3: Cross-pollination — borrow items from other store types ---
+  const crossRules = CROSS_POLLINATION[storeType];
+  if (crossRules) {
+    const crossCount = Math.max(0, crossRules.baseCount + crossRules.scalePer * (affluenceTier - 1));
+    if (crossCount > 0) {
+      // Build a flat pool of all borrowable items
+      const crossPool = [];
+      for (const source of crossRules.sources) {
+        const sourcePool = itemPools.pools?.[source.type];
+        if (!sourcePool) continue;
+        const allSourceItems = [...(sourcePool.base || []), ...(sourcePool.rotating || [])];
+        for (const item of allSourceItems) {
+          if (source.itemNames.includes(item.name)) {
+            crossPool.push(item);
+          }
+        }
+      }
+
+      if (crossPool.length > 0) {
+        // Pick unique cross items, skip any already in inventory
+        const existingNames = new Set(inventory.map(i => i.name));
+        const availableCross = crossPool.filter(i => !existingNames.has(i.name));
+        const selectedCross = pickNUnique(availableCross, Math.min(crossCount, availableCross.length));
+
+        for (const item of selectedCross) {
+          // Cross-pollinated items have limited quantity in non-specialty shops
+          const quantity = randInt(1, 5);
+          inventory.push(buildStandardItem(item, priceModifier, quantity));
+        }
+      }
+    }
+  }
+
+  // --- Step 4: Roll for magic/special items ---
   const magicChance = MAGIC_ITEM_CHANCES[affluenceTier] || MAGIC_ITEM_CHANCES[1];
   if (magicChance.chance > 0 && Math.random() < magicChance.chance) {
     const rarityWeights = RARITY_WEIGHTS_BY_AFFLUENCE[affluenceTier] || [];

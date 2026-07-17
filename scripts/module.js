@@ -6,6 +6,7 @@
  */
 
 import { ShopManager } from "./ui/shop-manager.js";
+import { ShopViewPlayer } from "./ui/shop-view-player.js";
 
 const MODULE_ID = "the-merchants-guild";
 
@@ -264,6 +265,16 @@ Hooks.once("ready", async () => {
   console.log("The Merchant's Guild | Module ready");
 
   await loadDataFiles();
+
+  // Register socket listener for all clients (players receive shop open events)
+  game.socket.on(`module.${MODULE_ID}`, (data) => {
+    if (data.action === "openShop" && !game.user.isGM) {
+      const visibility = game.settings.get(MODULE_ID, "playerShopVisibility");
+      if (visibility === "players-browse") {
+        new ShopViewPlayer(data.shopId).render(true);
+      }
+    }
+  });
 
   if (!game.user.isGM) return;
   console.log("The Merchant's Guild | GM detected, shop manager available");

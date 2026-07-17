@@ -10,6 +10,9 @@
     <div>
       <span class="mg-type-badge">{{typeLabel}}</span>
       <span class="mg-affluence-badge mg-affluence-{{shop.affluenceTier}}">{{affluenceLabel}}</span>
+      {{#if shop.location}}
+        <span class="mg-location-badge"><i class="fas fa-map-marker-alt"></i> {{shop.location}}</span>
+      {{/if}}
     </div>
     {{#if canShareToPlayers}}
       <button class="share-to-players-btn" type="button" title="Open for Players">
@@ -53,16 +56,11 @@
       </div>
       {{#each inventory}}
         <div class="mg-inv-row {{#if this.isOutOfStock}}mg-out-of-stock{{/if}} {{#if this.isMagic}}mg-rarity-{{this.rarity}}{{/if}}">
-          <span class="mg-inv-col-name mg-has-tooltip">
-            {{this.name}}
+          <span class="mg-inv-col-name {{#if this.isMagic}}mg-has-tooltip{{/if}}"
             {{#if this.isMagic}}
-              <div class="mg-tooltip">
-                <div class="mg-tooltip-title">{{this.name}}</div>
-                <div class="mg-tooltip-rarity">{{this.rarity}}</div>
-                <div class="mg-tooltip-desc">{{this.descriptionDM}}</div>
-                {{#if this.requiresAttunement}}<div class="mg-tooltip-attune"><i class="fas fa-link"></i> Requires Attunement</div>{{/if}}
-              </div>
-            {{/if}}
+              data-tooltip-dm="{{{this.tooltipData}}}"
+            {{/if}}>
+            {{this.name}}
           </span>
           <span class="mg-inv-col-price">
             <span class="mg-price-display" data-idx="{{this.idx}}" title="Click to edit price">

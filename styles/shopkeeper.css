@@ -817,33 +817,28 @@
 }
 
 /* ============================================================
-   Hover Tooltips
+   Floating Tooltips (JS-powered, appended to body, no clipping)
    ============================================================ */
 
 .mg-has-tooltip {
-  position: relative;
+  cursor: help;
 }
 
-.mg-tooltip {
-  display: none;
-  position: absolute;
-  left: 0;
-  top: 100%;
-  z-index: 100;
+.mg-floating-tooltip {
+  position: fixed;
+  z-index: 10000;
   background: #1a1a2e;
   color: #eee;
   border: 1px solid #555;
   border-radius: 6px;
   padding: 10px 12px;
-  width: 300px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  width: 320px;
+  max-width: 90vw;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
   pointer-events: none;
   font-size: 0.85em;
   line-height: 1.4;
-}
-
-.mg-has-tooltip:hover .mg-tooltip {
-  display: block;
+  font-family: "Signika", "Palatino Linotype", serif;
 }
 
 .mg-tooltip-title {

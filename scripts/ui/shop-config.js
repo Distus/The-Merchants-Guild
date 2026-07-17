@@ -149,6 +149,12 @@ export class ShopConfig extends Application {
     if (editedDesc) this._generatedShop.description = editedDesc;
     if (editedLocation !== undefined) this._generatedShop.location = editedLocation;
 
+    // Pick up edited shopkeeper name
+    const editedKeeperName = html.find(".edit-keeper-name").val();
+    if (editedKeeperName && this._generatedShop.shopkeeper) {
+      this._generatedShop.shopkeeper.name = editedKeeperName;
+    }
+
     // Save to world flags
     await saveShop(this._generatedShop);
 

@@ -46,16 +46,32 @@ export class ShopViewDM extends Application {
     const bias = keeper.bias;
 
     // Build inventory with index for referencing
-    const inventory = (shop.inventory || []).map((item, idx) => ({
-      ...item,
-      idx,
-      priceDisplay: formatPrice(item.listedPrice),
-      basePriceDisplay: formatPrice(item.basePrice),
-      priceDecimalGP: priceToGP(item.listedPrice),
-      quantityDisplay: item.quantity === null ? "∞" : item.quantity,
-      isOutOfStock: item.quantity !== null && item.quantity <= 0,
-      isMagic: item.rarity && item.rarity !== "common"
-    }));
+    const inventory = (shop.inventory || []).map((item, idx) => {
+      const isMagic = item.rarity && item.rarity !== "common";
+      // Build tooltip data as escaped JSON for data attribute
+      let tooltipData = "";
+      if (isMagic) {
+        const tooltipObj = {
+          name: item.name || "",
+          rarity: item.rarity || "",
+          desc: item.descriptionDM || item.name || "",
+          attune: item.requiresAttunement || false
+        };
+        // Escape for HTML attribute embedding
+        tooltipData = JSON.stringify(tooltipObj).replace(/&/g, "&amp;").replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+      }
+      return {
+        ...item,
+        idx,
+        priceDisplay: formatPrice(item.listedPrice),
+        basePriceDisplay: formatPrice(item.basePrice),
+        priceDecimalGP: priceToGP(item.listedPrice),
+        quantityDisplay: item.quantity === null ? "∞" : item.quantity,
+        isOutOfStock: item.quantity !== null && item.quantity <= 0,
+        isMagic,
+        tooltipData
+      };
+    });
 
     // Get player actors for transaction dropdown
     const playerActors = game.actors.filter(a =>
@@ -148,6 +164,44 @@ export class ShopViewDM extends Application {
     html.find(".share-to-players-btn").click((ev) => {
       ev.preventDefault();
       this._shareToPlayers();
+    });
+
+    // JS-powered tooltips — float above everything, no clipping
+    html.find(".mg-has-tooltip").on("mouseenter", (ev) => {
+      const el = ev.currentTarget;
+      const tooltipData = el.dataset.tooltipDm;
+      if (!tooltipData) return;
+
+      const parsed = JSON.parse(tooltipData);
+      const tooltip = document.createElement("div");
+      tooltip.className = "mg-floating-tooltip";
+      tooltip.innerHTML = `
+        <div class="mg-tooltip-title">${parsed.name}</div>
+        <div class="mg-tooltip-rarity">${parsed.rarity}</div>
+        <div class="mg-tooltip-desc">${parsed.desc}</div>
+        ${parsed.attune ? '<div class="mg-tooltip-attune"><i class="fas fa-link"></i> Requires Attunement</div>' : ''}
+      `;
+      document.body.appendChild(tooltip);
+
+      const rect = el.getBoundingClientRect();
+      tooltip.style.left = `${rect.left}px`;
+      tooltip.style.top = `${rect.bottom + 4}px`;
+
+      // If tooltip goes off-screen bottom, show above instead
+      const tooltipRect = tooltip.getBoundingClientRect();
+      if (tooltipRect.bottom > window.innerHeight) {
+        tooltip.style.top = `${rect.top - tooltipRect.height - 4}px`;
+      }
+
+      el._mgTooltip = tooltip;
+    });
+
+    html.find(".mg-has-tooltip").on("mouseleave", (ev) => {
+      const el = ev.currentTarget;
+      if (el._mgTooltip) {
+        el._mgTooltip.remove();
+        el._mgTooltip = null;
+      }
     });
   }
 
@@ -847,8 +901,15 @@ export class ShopViewDM extends Application {
     const shop = getShop(this._shopId);
     if (!shop) return;
 
+    // Emit socket event to all clients to open the player view
+    game.socket.emit(`module.${getModuleId()}`, {
+      action: "openShop",
+      shopId: this._shopId
+    });
+
+    // Also open DM's own preview
     new ShopViewPlayer(this._shopId).render(true);
-    ui.notifications.info(`Opened player view for ${shop.name}.`);
+    ui.notifications.info(`Opened ${shop.name} for all players.`);
   }
 }
 
