@@ -63,7 +63,10 @@ export class ShopConfig extends Application {
       maxRarity: tierInfo?.maxRarity || "common",
       consumableMax: tierInfo?.consumableMax || "uncommon",
       generatedShop: this._generatedShop,
-      hasPreview: !!this._generatedShop
+      hasPreview: !!this._generatedShop,
+      currentLocation: this._generatedShop?.location || "",
+      selectedStoreType: this._generatedShop?.type || "",
+      selectedAffluence: this._generatedShop?.affluenceTier || 2
     };
   }
 

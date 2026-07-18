@@ -4,7 +4,7 @@
       <label for="storeType">Store Type</label>
       <select name="storeType">
         {{#each storeTypes}}
-          <option value="{{this.id}}">{{this.label}}</option>
+          <option value="{{this.id}}" {{#if (eq this.id ../selectedStoreType)}}selected{{/if}}>{{this.label}}</option>
         {{/each}}
       </select>
     </div>
@@ -13,14 +13,14 @@
       <label for="affluenceTier">Town Affluence</label>
       <select name="affluenceTier">
         {{#each affluenceTiers}}
-          <option value="{{this.tier}}">{{this.label}}</option>
+          <option value="{{this.tier}}" {{#if (eq this.tier ../selectedAffluence)}}selected{{/if}}>{{this.label}}</option>
         {{/each}}
       </select>
     </div>
 
     <div class="mg-form-group">
       <label for="location">Location / Town Name (optional)</label>
-      <input type="text" name="location" placeholder="e.g. Baldur's Gate, Elturel, Waterdeep">
+      <input type="text" name="location" value="{{currentLocation}}" placeholder="e.g. Baldur's Gate, Elturel, Waterdeep">
     </div>
 
     <div class="mg-party-info">
