@@ -659,23 +659,16 @@ export class ShopViewDM extends Application {
     // Convert price to copper
     const priceCopperTotal = Math.round(priceGP * 100);
 
-    // Get actor's currency
+    // Get actor's currency and deduct smartly (preserves coin distribution)
     const currency = actor.system?.currency || {};
-    const actorCopper =
-      (currency.pp || 0) * 1000 +
-      (currency.gp || 0) * 100 +
-      (currency.ep || 0) * 50 +
-      (currency.sp || 0) * 10 +
-      (currency.cp || 0);
+    const newCurrency = deductCurrency(currency, priceCopperTotal);
 
-    if (actorCopper < priceCopperTotal) {
+    if (!newCurrency) {
+      const actorCopper = (currency.pp || 0) * 1000 + (currency.gp || 0) * 100 + (currency.ep || 0) * 50 + (currency.sp || 0) * 10 + (currency.cp || 0);
       ui.notifications.warn(`${actor.name} can't afford ${item.name} (needs ${priceGP} GP, has ${(actorCopper / 100).toFixed(2)} GP equivalent).`);
       return;
     }
 
-    // Deduct currency
-    const remainingCopper = actorCopper - priceCopperTotal;
-    const newCurrency = copperToCurrency(remainingCopper);
     await actor.update({ "system.currency": newCurrency });
 
     // Decrement shop quantity
@@ -853,7 +846,17 @@ export class ShopViewDM extends Application {
       (currency.cp || 0);
 
     const addedCopper = Math.round(priceGP * 100);
-    const newCurrency = copperToCurrency(currentCopper + addedCopper);
+    const addGP = Math.floor(addedCopper / 100);
+    const addSP = Math.floor((addedCopper % 100) / 10);
+    const addCP = addedCopper % 10;
+
+    const newCurrency = {
+      pp: currency.pp || 0,
+      gp: (currency.gp || 0) + addGP,
+      ep: currency.ep || 0,
+      sp: (currency.sp || 0) + addSP,
+      cp: (currency.cp || 0) + addCP
+    };
     await actor.update({ "system.currency": newCurrency });
 
     // Remove item from actor
@@ -994,7 +997,7 @@ function priceToGP(price) {
 }
 
 /**
- * Convert total copper to D&D currency denominations
+ * Convert total copper to D&D currency denominations (used for adding currency only)
  */
 function copperToCurrency(totalCopper) {
   let remaining = Math.max(0, Math.round(totalCopper));
@@ -1008,6 +1011,89 @@ function copperToCurrency(totalCopper) {
   const cp = remaining;
 
   return { pp, gp, ep, sp, cp };
+}
+
+/**
+ * Deduct a price from an actor's currency, preserving their coin distribution.
+ * Only breaks larger coins when smaller denominations can't cover the cost.
+ *
+ * @param {object} currency - Actor's current currency { pp, gp, ep, sp, cp }
+ * @param {number} priceCopperTotal - Total cost in copper pieces
+ * @returns {object|null} New currency object, or null if can't afford
+ */
+function deductCurrency(currency, priceCopperTotal) {
+  // Work with copies
+  let pp = currency.pp || 0;
+  let gp = currency.gp || 0;
+  let ep = currency.ep || 0;
+  let sp = currency.sp || 0;
+  let cp = currency.cp || 0;
+
+  let remaining = priceCopperTotal;
+
+  // Step 1: Pay with copper first
+  const cpUsed = Math.min(cp, remaining);
+  cp -= cpUsed;
+  remaining -= cpUsed;
+  if (remaining <= 0) return { pp, gp, ep, sp, cp };
+
+  // Step 2: Pay with silver (each sp = 10 cp)
+  const spNeeded = Math.ceil(remaining / 10);
+  const spUsed = Math.min(sp, spNeeded);
+  const spValue = spUsed * 10;
+  sp -= spUsed;
+  if (spValue >= remaining) {
+    // Overpaid with silver, give change back as copper
+    cp += (spValue - remaining);
+    return { pp, gp, ep, sp, cp };
+  }
+  remaining -= spValue;
+
+  // Step 3: Pay with electrum (each ep = 50 cp)
+  const epNeeded = Math.ceil(remaining / 50);
+  const epUsed = Math.min(ep, epNeeded);
+  const epValue = epUsed * 50;
+  ep -= epUsed;
+  if (epValue >= remaining) {
+    // Give change back as silver and copper
+    let change = epValue - remaining;
+    sp += Math.floor(change / 10);
+    cp += change % 10;
+    return { pp, gp, ep, sp, cp };
+  }
+  remaining -= epValue;
+
+  // Step 4: Pay with gold (each gp = 100 cp)
+  const gpNeeded = Math.ceil(remaining / 100);
+  const gpUsed = Math.min(gp, gpNeeded);
+  const gpValue = gpUsed * 100;
+  gp -= gpUsed;
+  if (gpValue >= remaining) {
+    // Give change back as silver and copper
+    let change = gpValue - remaining;
+    sp += Math.floor(change / 10);
+    cp += change % 10;
+    return { pp, gp, ep, sp, cp };
+  }
+  remaining -= gpValue;
+
+  // Step 5: Pay with platinum (each pp = 1000 cp)
+  const ppNeeded = Math.ceil(remaining / 1000);
+  const ppUsed = Math.min(pp, ppNeeded);
+  const ppValue = ppUsed * 1000;
+  pp -= ppUsed;
+  if (ppValue >= remaining) {
+    // Give change back as gold, silver, and copper
+    let change = ppValue - remaining;
+    gp += Math.floor(change / 100);
+    change %= 100;
+    sp += Math.floor(change / 10);
+    cp += change % 10;
+    return { pp, gp, ep, sp, cp };
+  }
+
+  // Can't afford
+  return null;
 }
 
 export { formatPrice, copperToCurrency };
