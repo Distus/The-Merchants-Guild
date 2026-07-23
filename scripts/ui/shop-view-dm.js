@@ -319,16 +319,24 @@ export class ShopViewDM extends Application {
   _showAddItemDialog() {
     const magicItems = getMagicItems();
     const allItems = (magicItems.items || []);
-    const options = allItems.map(item =>
+    const catalogOptions = allItems.map(item =>
       `<option value="${item.key}" data-rarity="${item.rarity}">${item.name} (${item.rarity})</option>`
     ).join("");
+
+    // Build world items list from game.items
+    const worldItems = game.items.map(item => {
+      const price = item.system?.price?.value || 0;
+      const denom = item.system?.price?.denomination || "gp";
+      return `<option value="${item.id}">${item.name} (${item.type}) — ${price} ${denom}</option>`;
+    }).join("");
 
     new Dialog({
       title: "Add Item to Shop",
       content: `
         <div class="mg-add-item-tabs" style="display:flex;gap:4px;margin-bottom:10px;">
-          <button type="button" class="mg-add-tab active" data-tab="magic" style="flex:1;padding:6px;">Magic Item</button>
-          <button type="button" class="mg-add-tab" data-tab="custom" style="flex:1;padding:6px;">Custom Item</button>
+          <button type="button" class="mg-add-tab active" data-tab="magic" style="flex:1;padding:6px;">Catalog</button>
+          <button type="button" class="mg-add-tab" data-tab="world" style="flex:1;padding:6px;">World Items</button>
+          <button type="button" class="mg-add-tab" data-tab="custom" style="flex:1;padding:6px;">Custom</button>
         </div>
 
         <div id="mg-add-magic-panel">
@@ -350,11 +358,41 @@ export class ShopViewDM extends Application {
           <div class="mg-form-group">
             <label>Item:</label>
             <select id="mg-add-item-select" size="8" style="width:100%;">
-              ${options}
+              ${catalogOptions}
             </select>
           </div>
           <p style="font-size:0.85em;color:#666;margin-top:4px;">
-            <i class="fas fa-info-circle"></i> Manual adds bypass party tier gating.
+            <i class="fas fa-info-circle"></i> Items from the module's built-in magic item catalog.
+          </p>
+        </div>
+
+        <div id="mg-add-world-panel" style="display:none;">
+          <div class="mg-form-group">
+            <label>Search:</label>
+            <input type="text" id="mg-world-search" placeholder="Type to filter..." style="width:100%;margin-bottom:6px;">
+          </div>
+          <div class="mg-form-group">
+            <label>Item:</label>
+            <select id="mg-add-world-select" size="8" style="width:100%;">
+              ${worldItems}
+            </select>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:6px;">
+            <div class="mg-form-group" style="flex:1;">
+              <label>Quantity:</label>
+              <input type="number" id="mg-world-qty" value="1" min="1" style="width:100%;">
+            </div>
+            <div class="mg-form-group" style="flex:1;">
+              <label>Price Override (GP, optional):</label>
+              <input type="number" id="mg-world-price" placeholder="Use item's price" min="0" step="0.01" style="width:100%;">
+            </div>
+          </div>
+          <div class="mg-form-group" style="margin-top:6px;">
+            <label>Player Description (vague):</label>
+            <input type="text" id="mg-world-player-desc" placeholder="Leave blank to use item name" style="width:100%;">
+          </div>
+          <p style="font-size:0.85em;color:#666;margin-top:4px;">
+            <i class="fas fa-info-circle"></i> Items you've created in Foundry's Items directory. Full item data imports on purchase.
           </p>
         </div>
 
@@ -415,6 +453,8 @@ export class ShopViewDM extends Application {
             if (activeTab === "magic") {
               const key = html.find("#mg-add-item-select").val();
               if (key) await this._addMagicItem(key);
+            } else if (activeTab === "world") {
+              await this._addWorldItem(html);
             } else {
               await this._addCustomItem(html);
             }
@@ -433,21 +473,31 @@ export class ShopViewDM extends Application {
           ev.currentTarget.classList.add("active");
           const tab = ev.currentTarget.dataset.tab;
           html.find("#mg-add-magic-panel").toggle(tab === "magic");
+          html.find("#mg-add-world-panel").toggle(tab === "world");
           html.find("#mg-add-custom-panel").toggle(tab === "custom");
         });
 
-        // Search filter
+        // Catalog search filter
         html.find("#mg-item-search").on("input", () => {
           const search = html.find("#mg-item-search").val().toLowerCase();
           const rarity = html.find("#mg-rarity-filter").val();
           this._filterItemList(html, search, rarity);
         });
 
-        // Rarity filter
+        // Catalog rarity filter
         html.find("#mg-rarity-filter").on("change", () => {
           const search = html.find("#mg-item-search").val().toLowerCase();
           const rarity = html.find("#mg-rarity-filter").val();
           this._filterItemList(html, search, rarity);
+        });
+
+        // World items search filter
+        html.find("#mg-world-search").on("input", () => {
+          const search = html.find("#mg-world-search").val().toLowerCase();
+          html.find("#mg-add-world-select option").each(function () {
+            const name = this.text.toLowerCase();
+            this.style.display = (!search || name.includes(search)) ? "" : "none";
+          });
         });
       }
     }).render(true);
@@ -462,6 +512,69 @@ export class ShopViewDM extends Application {
       const matchesRarity = rarity === "all" || itemRarity === rarity;
       this.style.display = (matchesSearch && matchesRarity) ? "" : "none";
     });
+  }
+
+  async _addWorldItem(html) {
+    const shop = getShop(this._shopId);
+    if (!shop) return;
+
+    const itemId = html.find("#mg-add-world-select").val();
+    if (!itemId) {
+      ui.notifications.warn("Select an item first.");
+      return;
+    }
+
+    const worldItem = game.items.get(itemId);
+    if (!worldItem) {
+      ui.notifications.error("Item not found.");
+      return;
+    }
+
+    const quantity = Number(html.find("#mg-world-qty").val()) || 1;
+    const priceOverride = html.find("#mg-world-price").val();
+    const playerDesc = html.find("#mg-world-player-desc").val();
+
+    // Get price from item or override
+    const itemPrice = worldItem.system?.price?.value || 0;
+    const itemDenom = worldItem.system?.price?.denomination || "gp";
+    let listedPrice = { gp: 0, sp: 0, cp: 0 };
+
+    if (priceOverride && Number(priceOverride) > 0) {
+      // Use override price (in GP, convert to denominations)
+      const overrideCopper = Math.round(Number(priceOverride) * 100);
+      listedPrice = {
+        gp: Math.floor(overrideCopper / 100),
+        sp: Math.floor((overrideCopper % 100) / 10),
+        cp: overrideCopper % 10
+      };
+    } else {
+      // Use the item's own price
+      if (itemDenom === "gp") listedPrice.gp = itemPrice;
+      else if (itemDenom === "sp") listedPrice.sp = itemPrice;
+      else if (itemDenom === "cp") listedPrice.cp = itemPrice;
+      else listedPrice.gp = itemPrice;
+    }
+
+    // Get description from the item
+    const dmDesc = worldItem.system?.description?.value || worldItem.name;
+
+    shop.inventory.push({
+      itemRef: `world-item:${itemId}`,
+      name: worldItem.name,
+      descriptionDM: dmDesc,
+      descriptionPlayer: playerDesc || worldItem.name,
+      basePrice: { ...listedPrice },
+      listedPrice: { ...listedPrice },
+      quantity,
+      rarity: worldItem.system?.rarity || "common",
+      category: worldItem.type || "loot",
+      requiresAttunement: worldItem.system?.attunement !== "" && worldItem.system?.attunement !== undefined && worldItem.system?.attunement !== "none",
+      tierRequired: 1
+    });
+
+    await saveShop(shop);
+    ui.notifications.info(`Added ${worldItem.name} to ${shop.name}.`);
+    this.render(true);
   }
 
   async _addCustomItem(html) {
@@ -698,22 +811,106 @@ export class ShopViewDM extends Application {
 
   async _addItemToActor(actor, shopItem) {
     try {
-      await actor.createEmbeddedDocuments("Item", [{
-        name: shopItem.name,
-        type: "loot",
-        system: {
-          description: { value: shopItem.descriptionDM || shopItem.name },
-          price: {
-            value: shopItem.basePrice?.gp || 0,
-            denomination: "gp"
-          },
-          rarity: shopItem.rarity || "common"
+      // Check if this is a world item reference (added via World Items tab)
+      if (shopItem.itemRef && shopItem.itemRef.startsWith("world-item:")) {
+        const worldItemId = shopItem.itemRef.replace("world-item:", "");
+        const worldItem = game.items.get(worldItemId);
+        if (worldItem) {
+          const itemData = worldItem.toObject();
+          delete itemData._id;
+          await actor.createEmbeddedDocuments("Item", [itemData]);
+          console.log(`The Merchant's Guild | Added world item "${shopItem.name}" to ${actor.name}`);
+          return;
         }
-      }]);
+      }
+
+      // Step 1: Search compendiums for the actual item (full stats, icon, type)
+      const compendiumItem = await this._findCompendiumItem(shopItem.name);
+
+      if (compendiumItem) {
+        // Found in compendium — import the full item with all stats and icon
+        const itemData = compendiumItem.toObject();
+        delete itemData._id;
+        await actor.createEmbeddedDocuments("Item", [itemData]);
+        console.log(`The Merchant's Guild | Added compendium item "${shopItem.name}" to ${actor.name}`);
+      } else {
+        // Not found — create a basic item as fallback
+        console.log(`The Merchant's Guild | No compendium match for "${shopItem.name}", creating basic item`);
+        await actor.createEmbeddedDocuments("Item", [{
+          name: shopItem.name,
+          type: this._guessItemType(shopItem),
+          system: {
+            description: { value: shopItem.descriptionDM || shopItem.name },
+            price: {
+              value: shopItem.basePrice?.gp || 0,
+              denomination: "gp"
+            },
+            rarity: shopItem.rarity || "common"
+          }
+        }]);
+      }
     } catch (err) {
-      console.warn("The Merchant's Guild | Could not auto-add item to actor:", err);
+      console.warn("The Merchant's Guild | Could not add item to actor:", err);
       ui.notifications.info(`Note: ${shopItem.name} couldn't be auto-added to ${actor.name}'s sheet. Add it manually.`);
     }
+  }
+
+  /**
+   * Search all dnd5e compendium packs for an item matching the given name
+   * Checks item compendiums (weapons, armor, equipment, etc.)
+   * @param {string} itemName - Name to search for
+   * @returns {Item|null} The full compendium item document, or null
+   */
+  async _findCompendiumItem(itemName) {
+    const searchName = itemName.toLowerCase().trim();
+
+    // Get all Item-type compendium packs from the dnd5e system
+    const itemPacks = game.packs.filter(p =>
+      p.documentName === "Item" &&
+      (p.metadata.packageType === "system" || p.metadata.id?.startsWith("dnd5e."))
+    );
+
+    for (const pack of itemPacks) {
+      // Get the pack index (lightweight list of all entries)
+      const index = await pack.getIndex();
+
+      // Search for exact name match first
+      let match = index.find(entry => entry.name.toLowerCase().trim() === searchName);
+
+      // If no exact match, try partial match (handles things like "Arrows (20)" vs "Arrow")
+      if (!match) {
+        match = index.find(entry => {
+          const entryName = entry.name.toLowerCase().trim();
+          return entryName.includes(searchName) || searchName.includes(entryName);
+        });
+      }
+
+      if (match) {
+        // Load the full document from the compendium
+        const fullItem = await pack.getDocument(match._id);
+        if (fullItem) return fullItem;
+      }
+    }
+
+    // Also check world-level items (homebrew items the DM created)
+    const worldItem = game.items.find(i =>
+      i.name.toLowerCase().trim() === searchName
+    );
+    if (worldItem) return worldItem;
+
+    return null;
+  }
+
+  /**
+   * Guess the item type for fallback item creation based on shop item data
+   */
+  _guessItemType(shopItem) {
+    const category = (shopItem.category || "").toLowerCase();
+    if (category === "weapons" || category === "ammunition") return "weapon";
+    if (category === "armor") return "equipment";
+    if (category === "potions" || category === "scrolls") return "consumable";
+    if (category === "tools" || category === "kits") return "tool";
+    return "loot";
   }
 
   // ============================================================
